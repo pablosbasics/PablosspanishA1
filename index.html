@@ -43,12 +43,10 @@ input[type=text]{padding:10px;font-size:1rem;border-radius:8px;border:1px solid 
   <h1>Español A1 – Mein Lernplan</h1>
   <p>Grammatik zuerst, dann sprechen. Jeden Tag ein Stück weiter.</p>
 </header>
-
 <div class="wrap">
   <nav id="nav"></nav>
   <main id="main"></main>
 </div>
-
 <script>
 /* ---------- INHALTE ---------- */
 const A1 = [
@@ -188,7 +186,6 @@ const A1 = [
   ]
 }
 ];
-
 const A2 = [
 {
   id:'a2-1', title:'A2 · 10. Pretérito perfecto', goal:'Erlebtes und Erfahrungen aus der Gegenwart heraus berichten',
@@ -329,7 +326,6 @@ const A2 = [
   ]
 }
 ];
-
 /* ---------- WORTSCHATZ ---------- */
 // Übungen werden aus den Vokabeln automatisch erzeugt (Multiple Choice und Übersetzung)
 function vocabEx(vocab){
@@ -352,7 +348,6 @@ function mkVocab(id, title, goal, vocab){
     ex: vocabEx(vocab)
   };
 }
-
 const VOC_A1 = [
 mkVocab('va1-1','A1 · Wortschatz: Begrüßung & Small Talk','Die ersten Sätze im Gespräch',[
   ['Hola','Hallo'],['Buenos días','Guten Morgen'],['Buenas tardes','Guten Tag / Guten Nachmittag'],['Buenas noches','Guten Abend / Gute Nacht'],
@@ -415,9 +410,7 @@ mkVocab('va2-7','A2 · Wortschatz: Telefon & Gesprächsphrasen','Am Telefon spre
   ['Un momento','Einen Moment'],['Más tarde','Später'],['Nos vemos','Wir sehen uns'],['¿Puedes repetirlo?','Kannst du das wiederholen?'],
   ['No entiendo','Ich verstehe nicht'],['¿Cómo se dice…?','Wie sagt man …?'],['Más despacio, por favor','Langsamer, bitte']])
 ];
-
 const LESSONS = [...A1, ...VOC_A1, ...A2, ...VOC_A2];
-
 /* ---------- HILFEN ---------- */
 const KEY = 'espanol-a1-progress-v1';
 let progress = JSON.parse(localStorage.getItem(KEY) || '{"done":{}}');
@@ -431,10 +424,8 @@ function say(t){
   u.lang = 'es-ES'; u.rate = 0.9;
   speechSynthesis.speak(u);
 }
-
 const nav = document.getElementById('nav');
 const main = document.getElementById('main');
-
 function buildNav(active){
   nav.innerHTML = `<div class="card"><button class="nav-btn ${active==='home'?'active':''}" data-go="home"><span>🏠 Start & Heute</span></button>
   <button class="nav-btn ${active==='exam'?'active':''}" data-go="exam"><span>📝 Prüfungs-Simulation</span></button></div>` +
@@ -444,7 +435,6 @@ function buildNav(active){
     return `<button class="nav-btn ${active===i?'active':''}" data-go="${i}"><span>${label}</span>${d!==undefined?`<span class="badge">${d}%</span>`:''}</button>`;
   }).join('');
 }
-
 /* ---------- ÜBUNGS-ENGINE ---------- */
 function renderEx(list, host, onFinish){
   host.innerHTML = '';
@@ -487,7 +477,6 @@ function renderEx(list, host, onFinish){
     }
   });
 }
-
 /* ---------- SEITEN ---------- */
 function showHome(){
   buildNav('home');
@@ -514,7 +503,6 @@ function showHome(){
       <button class="secondary" data-go="exam">Simulation starten</button>
     </div>`;
 }
-
 function showLesson(i){
   buildNav(i);
   const L = LESSONS[i];
@@ -539,7 +527,6 @@ function showLesson(i){
       `<p><b>Ergebnis: ${s}/${t} (${pct}%)</b> ${pct===100?'🎉 Perfekt!':'Wiederhole die Lektion und versuch es nochmal.'}</p>`);
   });
 }
-
 function showExam(){
   buildNav('exam');
   const all = LESSONS.flatMap(L=>L.ex.map(e=>({...e, lesson:L.title})));
@@ -554,7 +541,6 @@ function showExam(){
        <button class="secondary" data-go="exam">Neue Simulation</button>`);
   });
 }
-
 /* ---------- EVENTS ---------- */
 document.body.addEventListener('click', e=>{
   const go = e.target.closest('[data-go]');
@@ -568,7 +554,6 @@ document.body.addEventListener('click', e=>{
   const s = e.target.closest('[data-say]');
   if(s) say(s.dataset.say);
 });
-
 showHome();
 </script>
 </body>
