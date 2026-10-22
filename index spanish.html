@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Español A1 – Mein Lernplan</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--text:#222;--muted:#666;--accent:#c8102e;--ok:#2e7d32;--bad:#c62828;--line:#8883}
+@media (prefers-color-scheme: dark){:root{--bg:#1b1b1f;--card:#26262c;--text:#eee;--muted:#aaa}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.55}
+header{background:var(--accent);color:#fff;padding:16px 20px}
+header h1{margin:0;font-size:1.4rem}
+header p{margin:4px 0 0;opacity:.9;font-size:.95rem}
+.wrap{display:grid;grid-template-columns:260px 1fr;gap:16px;max-width:1100px;margin:0 auto;padding:16px}
+@media (max-width:800px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+nav .nav-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin:4px 0;padding:10px 12px;border:0;border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;font-size:.95rem}
+nav .nav-btn.active{outline:2px solid var(--accent)}
+.badge{font-size:.85rem;color:var(--ok);font-weight:600}
+.primary{background:var(--accent);color:#fff;border:0;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:1rem}
+.primary:disabled{opacity:.5;cursor:default}
+.secondary{background:var(--card);color:var(--text);border:1px solid var(--line);padding:10px 18px;border-radius:8px;cursor:pointer;font-size:1rem}
+.sound{background:none;border:1px solid var(--muted);border-radius:6px;cursor:pointer;padding:1px 8px;margin-left:6px;color:var(--text)}
+table{border-collapse:collapse;margin:8px 0}
+td,th{padding:5px 14px;border-bottom:1px solid var(--line);text-align:left}
+.opts button{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;font-size:1rem}
+.opts button:disabled{cursor:default}
+.opts button.sel{border:2px solid var(--accent)}
+input[type=text]{padding:10px;font-size:1rem;border-radius:8px;border:1px solid var(--line);width:100%;max-width:300px;background:var(--card);color:var(--text)}
+.ex{border-top:1px solid var(--line);padding:14px 0}
+.fb{margin-top:8px;font-weight:600;min-height:1.4em}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.muted{color:var(--muted)}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}
+.stat{background:var(--bg);border-radius:8px;padding:10px 14px}
+.stat b{font-size:1.3rem}
+.rule{background:var(--bg);border-left:4px solid var(--accent);padding:10px 14px;border-radius:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Español A1 – Mein Lernplan</h1>
+  <p>Grammatik zuerst, dann sprechen. Jeden Tag ein Stück weiter.</p>
+</header>
+
+<div class="wrap">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+/* ---------- INHALTE ---------- */
+const LESSONS = [
+{
+  id:'l1', title:'1. ser – Wer bin ich?', goal:'Name, Herkunft und Beruf beschreiben',
+  rule:`<table><tr><th>Person</th><th>ser</th></tr>
+  <tr><td>yo</td><td>soy</td></tr><tr><td>tú</td><td>eres</td></tr><tr><td>él / ella / usted</td><td>es</td></tr>
+  <tr><td>nosotros</td><td>somos</td></tr><tr><td>vosotros</td><td>sois</td></tr><tr><td>ellos / ellas / ustedes</td><td>son</td></tr></table>
+  <p class="rule"><b>Merke:</b> <i>ser</i> beschreibt, was etwas dauerhaft ist (Herkunft, Beruf, Identität).</p>`,
+  examples:['Yo soy de Alemania.','Ella es profesora.','Nosotros somos amigos.'],
+  ex:[
+    {t:'mc', q:'Yo ___ alemán.', o:['soy','eres','es','son'], a:0},
+    {t:'fill', q:'Nosotros ___ amigos. (ser)', a:'somos'},
+    {t:'mc', q:'Ellos ___ estudiantes.', o:['somos','son','sois','eres'], a:1},
+    {t:'fill', q:'Tú ___ de Madrid. (ser)', a:'eres'}
+  ]
+},
+{
+  id:'l2', title:'2. estar & ser vs. estar', goal:'Zustände und Orte beschreiben',
+  rule:`<table><tr><th>Person</th><th>estar</th></tr>
+  <tr><td>yo</td><td>estoy</td></tr><tr><td>tú</td><td>estás</td></tr><tr><td>él / ella / usted</td><td>está</td></tr>
+  <tr><td>nosotros</td><td>estamos</td></tr><tr><td>vosotros</td><td>estáis</td></tr><tr><td>ellos / ellas / ustedes</td><td>están</td></tr></table>
+  <p class="rule"><b>Merke:</b> <i>estar</i> steht für Ort und Zustand (wo bin ich, wie geht es mir).<br>
+  Ich <i>bin</i> Lehrer = <i>soy</i> profesor. Ich <i>bin</i> müde = <i>estoy</i> cansado.</p>`,
+  examples:['Estoy en casa.','¿Cómo estás?','Madrid está en España.'],
+  ex:[
+    {t:'mc', q:'¿Cómo ___ tú?', o:['estás','eres','estoy','son'], a:0},
+    {t:'fill', q:'Madrid ___ en España. (estar)', a:'está'},
+    {t:'mc', q:'Yo ___ cansado.', o:['soy','estoy','es','son'], a:1},
+    {t:'mc', q:'Mi hermano ___ alto.', o:['está','es','estás','están'], a:1, h:'Größe ist eine dauerhafte Eigenschaft: ser.'}
+  ]
+},
+{
+  id:'l3', title:'3. Artikel & Genus', goal:'Bestimmte und unbestimmte Artikel richtig setzen',
+  rule:`<table><tr><th></th><th>Singular</th><th>Plural</th></tr>
+  <tr><td>bestimmt (maskulin)</td><td>el</td><td>los</td></tr><tr><td>bestimmt (feminin)</td><td>la</td><td>las</td></tr>
+  <tr><td>unbestimmt (maskulin)</td><td>un</td><td>unos</td></tr><tr><td>unbestimmt (feminin)</td><td>una</td><td>unas</td></tr></table>
+  <p class="rule"><b>Merke:</b> Wörter auf -o sind meist maskulin, auf -a meist feminin. Plural: Vokal + s, Konsonant + es.</p>`,
+  examples:['El libro es nuevo.','Las mesas son grandes.'],
+  ex:[
+    {t:'mc', q:'___ casa es bonita.', o:['El','La','Los','Las'], a:1},
+    {t:'fill', q:'Plural von "el libro" (mit Artikel): ___ libros', a:'los'},
+    {t:'mc', q:'___ mesas', o:['El','La','Las','Los'], a:2},
+    {t:'fill', q:'un ___ (Hund) → Hund auf Spanisch', a:'perro', h:'Einen Hund heißt "un perro".'}
+  ]
+},
+{
+  id:'l4', title:'4. Präsens – regelmäßige Verben', goal:'Verben auf -ar, -er, -ir bilden',
+  rule:`<table><tr><th>Person</th><th>hablar (-ar)</th><th>comer (-er)</th><th>vivir (-ir)</th></tr>
+  <tr><td>yo</td><td>hablo</td><td>como</td><td>vivo</td></tr>
+  <tr><td>tú</td><td>hablas</td><td>comes</td><td>vives</td></tr>
+  <tr><td>él / ella / usted</td><td>habla</td><td>come</td><td>vive</td></tr>
+  <tr><td>nosotros</td><td>hablamos</td><td>comemos</td><td>vivimos</td></tr>
+  <tr><td>ellos / ellas / ustedes</td><td>hablan</td><td>comen</td><td>viven</td></tr></table>
+  <p class="rule"><b>Merke:</b> Endung vom Infinitiv abschneiden (hablar → habl-) und die Endung dazusetzen.</p>`,
+  examples:['Yo hablo español.','Ellos viven en Berlín.'],
+  ex:[
+    {t:'fill', q:'Yo ___ (hablar)', a:'hablo'},
+    {t:'mc', q:'Tú ___ (comer)', o:['como','comes','come','comen'], a:1},
+    {t:'fill', q:'Nosotros ___ (vivir)', a:'vivimos'},
+    {t:'mc', q:'Ella ___ (trabajar)', o:['trabaja','trabajas','trabajan','trabajo'], a:0}
+  ]
+},
+{
+  id:'l5', title:'5. Wichtige Unregelmäßige Verben', goal:'tener, ir, hacer, querer, poder',
+  rule:`<table><tr><th>Person</th><th>tener</th><th>ir</th><th>hacer</th><th>poder</th></tr>
+  <tr><td>yo</td><td>tengo</td><td>voy</td><td>hago</td><td>puedo</td></tr>
+  <tr><td>tú</td><td>tienes</td><td>vas</td><td>haces</td><td>puedes</td></tr>
+  <tr><td>él / ella / usted</td><td>tiene</td><td>va</td><td>hace</td><td>puede</td></tr>
+  <tr><td>ellos / ellas / ustedes</td><td>tienen</td><td>van</td><td>hacen</td><td>pueden</td></tr></table>
+  <p class="rule"><b>Merke:</b> Diese Verben sind im Präsens unregelmäßig. Häufig gebraucht, also gut einprägen.</p>`,
+  examples:['Tengo tres hermanos.','Vamos al parque.','¿Qué haces hoy?'],
+  ex:[
+    {t:'fill', q:'Yo ___ (tener) un perro.', a:'tengo'},
+    {t:'mc', q:'Ellos ___ (ir) al cine.', o:['va','vamos','van','voy'], a:2},
+    {t:'fill', q:'¿Qué ___ (hacer) tú?', a:'haces'},
+    {t:'mc', q:'Yo ___ (poder) nadar.', o:['puedo','puede','podemos','pueden'], a:0}
+  ]
+},
+{
+  id:'l6', title:'6. gustar', goal:'Vorlieben ausdrücken',
+  rule:`<p class="rule"><b>Merke:</b> <i>gustar</i> funktioniert "rückwärts": Das Gefallende ist das Subjekt.<br>
+  Me <b>gusta</b> el café. (Mir gefällt der Kaffee.)<br>
+  Me <b>gustan</b> los perros. (Mir gefallen die Hunde.)</p>
+  <table><tr><th>Person</th><th>Singular</th><th>Plural</th></tr>
+  <tr><td>me (mir)</td><td>me gusta</td><td>me gustan</td></tr>
+  <tr><td>te (dir)</td><td>te gusta</td><td>te gustan</td></tr>
+  <tr><td>le (ihm/ihr/Ihnen)</td><td>le gusta</td><td>le gustan</td></tr></table>`,
+  examples:['Me gusta el café.','Me gustan los perros.','¿Te gusta bailar?'],
+  ex:[
+    {t:'mc', q:'A mí ___ el fútbol.', o:['me gusta','me gustan','gusto','gustas'], a:0},
+    {t:'fill', q:'Me ___ las manzanas. (gustar)', a:'gustan'},
+    {t:'mc', q:'¿Te ___ la música?', o:['gusta','gustan','gustas','gusto'], a:0},
+    {t:'mc', q:'A ella ___ los libros.', o:['le gustan','le gusta','les gustan','me gusta'], a:0}
+  ]
+},
+{
+  id:'l7', title:'7. Possessivbegleiter & Adjektive', goal:'mi, tu, su und Adjektiv-Endungen',
+  rule:`<table><tr><th></th><th>Singular</th><th>Plural</th></tr>
+  <tr><td>mein</td><td>mi</td><td>mis</td></tr><tr><td>dein</td><td>tu</td><td>tus</td></tr><tr><td>sein/ihr/Ihr</td><td>su</td><td>sus</td></tr></table>
+  <p class="rule"><b>Merke:</b> Adjektive passen sich dem Nomen an: alto / alta / altos / altas.<br>
+  Adjektive stehen meist nach dem Nomen: un coche <b>rojo</b>.</p>`,
+  examples:['Mi madre es simpática.','Mis hermanos son altos.'],
+  ex:[
+    {t:'mc', q:'___ madre es simpática.', o:['Mi','Mis','Tu','Sus'], a:0},
+    {t:'fill', q:'Las casas son ___ (grande)', a:'grandes'},
+    {t:'mc', q:'Un coche ___ (rojo)', o:['rojo','roja','rojos','rojas'], a:0},
+    {t:'fill', q:'Mis hermanas son ___ (alto)', a:'altas'}
+  ]
+},
+{
+  id:'l8', title:'8. Fragen & Verneinung', goal:'Fragen stellen und verneinen',
+  rule:`<table><tr><th>Frage</th><th>Bedeutung</th></tr>
+  <tr><td>¿Qué?</td><td>Was?</td></tr><tr><td>¿Dónde?</td><td>Wo?</td></tr><tr><td>¿Cuándo?</td><td>Wann?</td></tr>
+  <tr><td>¿Cómo?</td><td>Wie?</td></tr><tr><td>¿Cuánto/a/os/as?</td><td>Wie viel(e)?</td></tr><tr><td>¿Quién?</td><td>Wer?</td></tr></table>
+  <p class="rule"><b>Merke:</b> Die Verneinung steht einfach vor dem Verb: <b>No</b> hablo francés.</p>`,
+  examples:['¿Dónde vives?','¿Cuántos años tienes?','No hablo francés.'],
+  ex:[
+    {t:'mc', q:'¿___ vives?', o:['Dónde','Cuándo','Quién','Cuál'], a:0},
+    {t:'mc', q:'¿___ años tienes?', o:['Cuántos','Cuántas','Qué','Cuándo'], a:0},
+    {t:'fill', q:'Yo ___ español. (verneint: ich spreche kein Spanisch)', a:'no hablo', alt:['no hablo'], h:'Die Verneinung "no" steht vor dem Verb.'},
+    {t:'mc', q:'Wie heißt "Wo wohnst du?" auf Spanisch?', o:['¿Dónde vives?','¿Quién vives?','¿Cuándo vives?','¿Qué vives?'], a:0}
+  ]
+},
+{
+  id:'l9', title:'9. Zahlen, hay & Uhrzeit', goal:'Zahlen, Mengen und Zeitangaben',
+  rule:`<p><b>Zahlen:</b> 0 cero · 1 uno · 2 dos · 3 tres · 4 cuatro · 5 cinco · 6 seis · 7 siete · 8 ocho · 9 nueve · 10 diez · 11 once · 12 doce · 13 trece · 14 catorce · 15 quince · 16 dieciséis · 17 diecisiete · 18 dieciocho · 19 diecinueve · 20 veinte</p>
+  <p class="rule"><b>Merke:</b> <i>hay</i> bedeutet "es gibt" (für Singular und Plural): Hay un libro. / Hay dos libros.<br>
+  Uhrzeit: <b>Es la una.</b> (1 Uhr) · <b>Son las tres.</b> (3 Uhr)</p>
+  <p>Wochentage: lunes, martes, miércoles, jueves, viernes, sábado, domingo</p>`,
+  examples:['Hay dos libros en la mesa.','Son las tres y media.','El lunes es el primer día.'],
+  ex:[
+    {t:'fill', q:'7 + 5 = ? (auf Spanisch)', a:'doce'},
+    {t:'mc', q:'"veinte" bedeutet:', o:['20','12','30','2'], a:0},
+    {t:'mc', q:'Hay ___ libros.', o:['un','una','dos'], a:2, h:'"libros" ist maskulin Plural, also nicht "una".'},
+    {t:'mc', q:'Wie sagt man "Es ist ein Uhr"?', o:['Es la una.','Son la una.','Es las una.','Son uno.'], a:0}
+  ]
+}
+];
+
+/* ---------- HILFEN ---------- */
+const KEY = 'espanol-a1-progress-v1';
+let progress = JSON.parse(localStorage.getItem(KEY) || '{"done":{}}');
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(progress)); }catch(e){} }
+
+const norm = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function say(t){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang = 'es-ES'; u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+
+const nav = document.getElementById('nav');
+const main = document.getElementById('main');
+
+function buildNav(active){
+  nav.innerHTML = `<div class="card"><button class="nav-btn ${active==='home'?'active':''}" data-go="home"><span>🏠 Start & Heute</span></button>
+  <button class="nav-btn ${active==='exam'?'active':''}" data-go="exam"><span>📝 Prüfungs-Simulation</span></button></div>` +
+  LESSONS.map((L,i)=>{
+    const d = progress.done[L.id];
+    return `<button class="nav-btn ${active===i?'active':''}" data-go="${i}"><span>${L.title}</span>${d!==undefined?`<span class="badge">${d}%</span>`:''}</button>`;
+  }).join('');
+}
+
+/* ---------- ÜBUNGS-ENGINE ---------- */
+function renderEx(list, host, onFinish){
+  host.innerHTML = '';
+  let score = 0, n = 0;
+  list.forEach((e,i)=>{
+    const d = document.createElement('div');
+    d.className = 'ex';
+    d.innerHTML = `<p><b>${i+1}.</b> ${e.q}</p>` + (e.t==='mc'
+      ? `<div class="opts">${e.o.map((o,j)=>`<button data-j="${j}">${o}</button>`).join('')}</div>`
+      : `<input type="text" autocomplete="off" placeholder="Antwort auf Spanisch"> <button class="primary chk">Prüfen</button>`)
+      + `<div class="fb"></div>`;
+    host.appendChild(d);
+    const fb = d.querySelector('.fb');
+    const finish = (ok, txt)=>{
+      if(d.dataset.done) return;
+      d.dataset.done = 1; n++; if(ok) score++;
+      fb.className = 'fb ' + (ok?'ok':'bad');
+      fb.textContent = (ok ? '✔ Richtig! ' : '✘ Leider falsch. ') + txt;
+      if(n === list.length) onFinish(score, list.length);
+    };
+    if(e.t === 'mc'){
+      d.querySelectorAll('.opts button').forEach(b=>b.onclick = ()=>{
+        if(d.dataset.done) return;
+        const j = +b.dataset.j;
+        d.querySelectorAll('.opts button').forEach(x=>x.disabled = true);
+        b.classList.add('sel');
+        finish(j === e.a, e.h || ('Richtige Antwort: ' + e.o[e.a]));
+      });
+    } else {
+      const inp = d.querySelector('input');
+      const go = ()=>{
+        if(!inp.value.trim() || d.dataset.done) return;
+        const v = norm(inp.value);
+        const ok = v === norm(e.a) || (e.alt||[]).some(x=>norm(x)===v);
+        inp.disabled = true;
+        finish(ok, e.h || ('Richtige Antwort: ' + e.a));
+      };
+      d.querySelector('.chk').onclick = go;
+      inp.onkeydown = ev => { if(ev.key === 'Enter') go(); };
+    }
+  });
+}
+
+/* ---------- SEITEN ---------- */
+function showHome(){
+  buildNav('home');
+  const doneCount = Object.keys(progress.done).length;
+  const avg = doneCount ? Math.round(Object.values(progress.done).reduce((a,b)=>a+b,0)/doneCount) : 0;
+  const todayIdx = Math.floor(Date.now()/86400000) % LESSONS.length;
+  main.innerHTML = `
+    <div class="card">
+      <h2>Hola! Dein Lernstand</h2>
+      <div class="stats">
+        <div class="stat">Lektionen begonnen<br><b>${doneCount}/${LESSONS.length}</b></div>
+        <div class="stat">Ø Ergebnis<br><b>${avg}%</b></div>
+      </div>
+      <p class="muted">Tipp: 20 Minuten pro Tag sind besser als 2 Stunden pro Woche. Jede Lektion erst lesen, dann laut nachsprechen, dann üben.</p>
+    </div>
+    <div class="card">
+      <h3>Heute empfohlen</h3>
+      <p>${LESSONS[todayIdx].title}: ${LESSONS[todayIdx].goal}</p>
+      <button class="primary" data-go="${todayIdx}">Heutige Lektion starten</button>
+    </div>
+    <div class="card">
+      <h3>Prüfungs-Simulation</h3>
+      <p>20 gemischte Aufgaben aus allen Lektionen. Ideal, um deinen Stand zu prüfen.</p>
+      <button class="secondary" data-go="exam">Simulation starten</button>
+    </div>`;
+}
+
+function showLesson(i){
+  buildNav(i);
+  const L = LESSONS[i];
+  main.innerHTML = `
+    <div class="card">
+      <h2>${L.title}</h2>
+      <p class="muted">${L.goal}</p>
+      ${L.rule}
+      <h3>Beispiele zum Anhören & Nachsprechen</h3>
+      ${L.examples.map(s=>`<p>${s}<button class="sound" data-say="${s}">🔊</button></p>`).join('')}
+    </div>
+    <div class="card">
+      <h3>Übungen</h3>
+      <div id="exh"></div>
+    </div>`;
+  renderEx(L.ex, document.getElementById('exh'), (s,t)=>{
+    const pct = Math.round(s/t*100);
+    progress.done[L.id] = Math.max(progress.done[L.id] || 0, pct);
+    save();
+    buildNav(i);
+    document.getElementById('exh').insertAdjacentHTML('beforeend',
+      `<p><b>Ergebnis: ${s}/${t} (${pct}%)</b> ${pct===100?'🎉 Perfekt!':'Wiederhole die Lektion und versuch es nochmal.'}</p>`);
+  });
+}
+
+function showExam(){
+  buildNav('exam');
+  const all = LESSONS.flatMap(L=>L.ex.map(e=>({...e, lesson:L.title})));
+  const picked = all.sort(()=>Math.random()-0.5).slice(0,20);
+  main.innerHTML = `<div class="card"><h2>Prüfungs-Simulation</h2>
+    <p class="muted">20 zufällige Aufgaben aus allen Lektionen.</p><div id="exh"></div></div>`;
+  renderEx(picked, document.getElementById('exh'), (s,t)=>{
+    const pct = Math.round(s/t*100);
+    document.getElementById('exh').insertAdjacentHTML('beforeend',
+      `<p><b>Gesamtergebnis: ${s}/${t} (${pct}%)</b><br>
+       ${pct>=80?'Sehr gut! Dein Grammatik-Grundgerüst sitzt.':pct>=60?'Gut, aber einige Bereiche brauchen noch Übung.':'Wiederhole die Lektionen mit den meisten Fehlern.'}</p>
+       <button class="secondary" data-go="exam">Neue Simulation</button>`);
+  });
+}
+
+/* ---------- EVENTS ---------- */
+document.body.addEventListener('click', e=>{
+  const go = e.target.closest('[data-go]');
+  if(go){
+    const g = go.dataset.go;
+    if(g==='home') showHome();
+    else if(g==='exam') showExam();
+    else showLesson(+g);
+    window.scrollTo(0,0);
+  }
+  const s = e.target.closest('[data-say]');
+  if(s) say(s.dataset.say);
+});
+
+showHome();
+</script>
+</body>
+</html>
