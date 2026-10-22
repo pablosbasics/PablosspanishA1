@@ -1,17 +1,5 @@
 # Español A1 – Mein Lernplan
 
-Eine einzelne HTML-Datei mit Grammatik-Lektionen, Übungen und einer Prüfungs-Simulation. Der Lernfortschritt wird im Browser gespeichert.
-
-## Auf GitHub Pages veröffentlichen
-
-1. Auf github.com ein neues Repository anlegen, z. B. `spanisch-a1` (Sichtbarkeit: **Private**, dann ist es nur für dich).
-2. `index.html` hochladen (Button "Add file" → "Upload files").
-3. Im Repository: **Settings → Pages**.
-4. Unter "Build and deployment" als Source **Deploy from a branch** wählen, Branch `main`, Ordner `/ (root)`, speichern.
-5. Nach etwa einer Minute ist die Seite unter `https://DEIN-NAME.github.io/spanisch-a1/` erreichbar.
-
-Hinweis: Bei einem privaten Repository ist GitHub Pages je nach Konto-Plan nur eingeschränkt verfügbar. Wenn das bei dir nicht geht, reicht es, die Datei lokal per Doppelklick im Browser zu öffnen.
-
 ## Tägliche Routine (ca. 20 Minuten)
 
 1. Start-Seite öffnen, "Heutige Lektion" starten.
