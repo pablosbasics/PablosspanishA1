@@ -51,7 +51,7 @@ input[type=text]{padding:10px;font-size:1rem;border-radius:8px;border:1px solid 
 
 <script>
 /* ---------- INHALTE ---------- */
-const LESSONS = [
+const A1 = [
 {
   id:'l1', title:'1. ser – Wer bin ich?', goal:'Name, Herkunft und Beruf beschreiben',
   rule:`<table><tr><th>Person</th><th>ser</th></tr>
@@ -189,12 +189,241 @@ const LESSONS = [
 }
 ];
 
+const A2 = [
+{
+  id:'a2-1', title:'A2 · 10. Pretérito perfecto', goal:'Erlebtes und Erfahrungen aus der Gegenwart heraus berichten',
+  rule:`<p class="rule"><b>Bildung:</b> haber (he, has, ha, hemos, habéis, han) + Partizip.<br>
+  -ar → -ado (hablado), -er/-ir → -ido (comido, vivido).<br>
+  Unregelmäßig: hecho, dicho, visto, escrito, puesto.</p>
+  <p><b>Merke:</b> Man verwendet es für Ereignisse in der Gegenwartszeit (hoy, esta semana, este año) und für Lebenserfahrungen (ya, nunca, alguna vez).</p>`,
+  examples:['He comido paella hoy.','¿Has visto la película?','Nunca he viajado a Argentina.'],
+  ex:[
+    {t:'fill', q:'Yo ___ (comer) paella hoy.', a:'he comido', alt:['comido']},
+    {t:'mc', q:'Nosotros ___ a Italia este año.', o:['hemos viajado','hemos viajar','han viajado','he viajado'], a:0},
+    {t:'mc', q:'¿Qué ___ tú hoy?', o:['has hecho','has hacido','ha hecho','hemos hecho'], a:0},
+    {t:'fill', q:'Ellos han ___ (ver) la película.', a:'visto'}
+  ]
+},
+{
+  id:'a2-2', title:'A2 · 11. Pretérito indefinido (regelmäßig)', goal:'Abgeschlossene Ereignisse in der Vergangenheit erzählen',
+  rule:`<table><tr><th></th><th>hablar</th><th>comer</th><th>vivir</th></tr>
+  <tr><td>yo</td><td>hablé</td><td>comí</td><td>viví</td></tr>
+  <tr><td>tú</td><td>hablaste</td><td>comiste</td><td>viviste</td></tr>
+  <tr><td>él / ella / usted</td><td>habló</td><td>comió</td><td>vivió</td></tr>
+  <tr><td>nosotros</td><td>hablamos</td><td>comimos</td><td>vivimos</td></tr>
+  <tr><td>ellos / ellas / ustedes</td><td>hablaron</td><td>comieron</td><td>vivieron</td></tr></table>
+  <p class="rule"><b>Merke:</b> Typische Zeitangaben: ayer, anoche, el año pasado, el lunes, hace dos días.</p>`,
+  examples:['Ayer hablé con mi madre.','Anoche comí pizza.','Mis abuelos vivieron en Sevilla.'],
+  ex:[
+    {t:'mc', q:'Ayer ___ con mi madre.', o:['hablé','hablo','hablaba','hablaste'], a:0},
+    {t:'fill', q:'Anoche ___ (comer, yo) pizza.', a:'comí'},
+    {t:'mc', q:'Ella ___ en Madrid dos años.', o:['vivió','vive','vivía','vivir'], a:0},
+    {t:'fill', q:'El año pasado nosotros ___ (viajar) a Sevilla.', a:'viajamos'}
+  ]
+},
+{
+  id:'a2-3', title:'A2 · 12. Pretérito indefinido (unregelmäßig)', goal:'Die wichtigsten unregelmäßigen Verben der Vergangenheit',
+  rule:`<table><tr><th>Person</th><th>ir / ser</th><th>hacer</th><th>tener</th><th>estar</th></tr>
+  <tr><td>yo</td><td>fui</td><td>hice</td><td>tuve</td><td>estuve</td></tr>
+  <tr><td>tú</td><td>fuiste</td><td>hiciste</td><td>tuviste</td><td>estuviste</td></tr>
+  <tr><td>él / ella / usted</td><td>fue</td><td>hizo</td><td>tuvo</td><td>estuvo</td></tr>
+  <tr><td>nosotros</td><td>fuimos</td><td>hicimos</td><td>tuvimos</td><td>estuvimos</td></tr>
+  <tr><td>ellos / ellas / ustedes</td><td>fueron</td><td>hicieron</td><td>tuvieron</td><td>estuvieron</td></tr></table>
+  <p class="rule"><b>Merke:</b> <i>ir</i> und <i>ser</i> haben im Indefinido dieselbe Form. Der Kontext zeigt, was gemeint ist.</p>`,
+  examples:['Ayer fui al cine.','Ella hizo una tarta.','Nosotros tuvimos mucha suerte.'],
+  ex:[
+    {t:'mc', q:'Ayer ___ al cine.', o:['fui','fue','fuiste','ir'], a:0},
+    {t:'fill', q:'Ella ___ (hacer) una tarta.', a:'hizo'},
+    {t:'mc', q:'Nosotros ___ (tener) mucha suerte.', o:['tuvimos','tuvieron','tuve','tenemos'], a:0},
+    {t:'fill', q:'Ayer yo ___ (estar) en casa.', a:'estuve'}
+  ]
+},
+{
+  id:'a2-4', title:'A2 · 13. Imperfecto & Indefinido', goal:'Hintergründe beschreiben und Ereignisse erzählen',
+  rule:`<table><tr><th>Person</th><th>hablar</th><th>comer</th><th>ser</th><th>ir</th></tr>
+  <tr><td>yo</td><td>hablaba</td><td>comía</td><td>era</td><td>iba</td></tr>
+  <tr><td>tú</td><td>hablabas</td><td>comías</td><td>eras</td><td>ibas</td></tr>
+  <tr><td>él / ella</td><td>hablaba</td><td>comía</td><td>era</td><td>iba</td></tr></table>
+  <p class="rule"><b>Merke:</b><br>
+  <b>Imperfecto</b> = Hintergrund, Gewohnheiten, Beschreibungen (Cuando era niño, vivía en el campo. Hacía frío.)<br>
+  <b>Indefinido</b> = einmaliges, abgeschlossenes Ereignis (Ayer llegó mi amigo.)</p>`,
+  examples:['Cuando era niño, vivía en el campo.','Hacía frío y llovía.','Ayer llegó mi amigo.'],
+  ex:[
+    {t:'mc', q:'Cuando era niño, ___ en el campo.', o:['vivía','viví','vivió','vive'], a:0},
+    {t:'fill', q:'Antes ___ (tener, yo) un coche rojo.', a:'tenía'},
+    {t:'mc', q:'Ayer ___ mucho frío. (Wetter beschreiben)', o:['hacía','hizo','hace','hice'], a:0, h:'Wetter in der Vergangenheit beschreibt man mit dem Imperfecto.'},
+    {t:'mc', q:'Mientras yo ___, mi hermano ___.', o:['cocinaba – leía','cociné – leí','cocino – leo','cocinaba – leí'], a:0}
+  ]
+},
+{
+  id:'a2-5', title:'A2 · 14. Objektpronomen', goal:'Direkte und indirekte Objekte ersetzen',
+  rule:`<table><tr><th></th><th>direkt (Akk.)</th><th>indirekt (Dat.)</th></tr>
+  <tr><td>mich / dich</td><td>me / te</td><td>me / te</td></tr>
+  <tr><td>ihn / sie (Sache)</td><td>lo / la</td><td>le</td></tr>
+  <tr><td>uns / euch</td><td>nos / os</td><td>nos / os</td></tr>
+  <tr><td>sie (Plural)</td><td>los / las</td><td>les</td></tr></table>
+  <p class="rule"><b>Merke:</b> Das Pronomen steht vor dem konjugierten Verb: <b>Lo</b> tengo. Oder am Infinitiv angehängt: Voy a comprar<b>lo</b> / <b>Lo</b> voy a comprar.</p>`,
+  examples:['Lo tengo.','A mi hermana le regalo un libro.','Lo voy a comprar.'],
+  ex:[
+    {t:'mc', q:'¿Tienes el libro? Sí, ___ tengo.', o:['lo','la','le','les'], a:0},
+    {t:'mc', q:'A mi hermana ___ regalo un libro.', o:['le','lo','la','les'], a:0},
+    {t:'mc', q:'Wie sagt man "Ich kaufe es" (el coche)?', o:['Lo compro.','Compro lo.','Le compro.','La compro.'], a:0},
+    {t:'fill', q:'Veo a Juan. → ___ veo. (ihn)', a:'lo'}
+  ]
+},
+{
+  id:'a2-6', title:'A2 · 15. Vergleiche', goal:'Vergleichen und Superlative bilden',
+  rule:`<table><tr><th>Struktur</th><th>Beispiel</th></tr>
+  <tr><td>más / menos + Adj. + que</td><td>Madrid es más grande que Hannover.</td></tr>
+  <tr><td>tan + Adj. + como</td><td>Mi casa es tan grande como la tuya.</td></tr>
+  <tr><td>mejor / peor</td><td>Este libro es mejor que el otro.</td></tr>
+  <tr><td>el / la / los / las más + Adj.</td><td>Ella es la más alta de la clase.</td></tr></table>`,
+  examples:['Madrid es más grande que Hannover.','Este libro es mejor que el otro.'],
+  ex:[
+    {t:'mc', q:'Madrid es ___ grande ___ Hannover.', o:['más – que','más – como','tan – que','mejor – que'], a:0},
+    {t:'fill', q:'Este libro es ___ (gut, Vergleich) que el otro.', a:'mejor'},
+    {t:'mc', q:'Ella es ___ alta de la clase.', o:['la más','el más','más','muy'], a:0},
+    {t:'mc', q:'"tan … como" bedeutet:', o:['so … wie','mehr … als','besser als','am meisten'], a:0}
+  ]
+},
+{
+  id:'a2-7', title:'A2 · 16. Reflexive Verben', goal:'Über den Alltag sprechen (aufstehen, sich waschen, sich anziehen)',
+  rule:`<table><tr><th>Person</th><th>levantarse</th><th>ducharse</th></tr>
+  <tr><td>yo</td><td>me levanto</td><td>me ducho</td></tr>
+  <tr><td>tú</td><td>te levantas</td><td>te duchas</td></tr>
+  <tr><td>él / ella / usted</td><td>se levanta</td><td>se ducha</td></tr>
+  <tr><td>nosotros</td><td>nos levantamos</td><td>nos duchamos</td></tr>
+  <tr><td>ellos / ellas / ustedes</td><td>se levantan</td><td>se duchan</td></tr></table>
+  <p class="rule"><b>Merke:</b> Das Reflexivpronomen (me, te, se, nos) steht vor dem Verb. Wörterbuch-Form: "-se" am Ende (llamarse, acostarse).</p>`,
+  examples:['Me levanto a las siete.','¿Cómo se llama usted?','Ellos se acuestan tarde.'],
+  ex:[
+    {t:'mc', q:'Yo ___ a las siete. (levantarse)', o:['me levanto','te levantas','se levanta','nos levantamos'], a:0},
+    {t:'fill', q:'¿Cómo ___ usted? (llamarse)', a:'se llama'},
+    {t:'mc', q:'Nosotros ___ por la mañana. (ducharse)', o:['nos duchamos','nos ducháis','se duchan','me duchamos'], a:0},
+    {t:'fill', q:'Ellos ___ tarde. (acostarse)', a:'se acuestan'}
+  ]
+},
+{
+  id:'a2-8', title:'A2 · 17. estar + Gerundio, hace/desde & ir a', goal:'Gerade laufende Handlungen, Dauer und Zukunft ausdrücken',
+  rule:`<p class="rule"><b>Gerundio:</b> -ar → -ando (hablando), -er/-ir → -iendo (comiendo, viviendo). Mit <i>estar</i>: Estoy comiendo. (Ich esse gerade.)</p>
+  <p class="rule"><b>Dauer:</b> Vivo aquí <b>desde hace</b> tres años. (Ich wohne seit drei Jahren hier.)</p>
+  <p class="rule"><b>Zukunft:</b> ir a + Infinitiv: Mañana voy a viajar a Barcelona.</p>`,
+  examples:['Estoy comiendo.','Vivo aquí desde hace tres años.','Mañana voy a viajar.'],
+  ex:[
+    {t:'fill', q:'Estoy ___ (comer). (gerade essen)', a:'comiendo'},
+    {t:'mc', q:'Vivo aquí ___ tres años.', o:['desde hace','hace','desde','para'], a:0},
+    {t:'mc', q:'Mañana ___ a Barcelona.', o:['voy a viajar','voy viajar','vamos viajar','voy viajo'], a:0},
+    {t:'fill', q:'Ahora mismo ___ (leer, nosotros). (wir lesen gerade)', a:'estamos leyendo'}
+  ]
+},
+{
+  id:'a2-9', title:'A2 · 18. Imperativ & Präpositionen', goal:'Bitten, Anweisungen geben und "für mich / mit dir" sagen',
+  rule:`<p class="rule"><b>Imperativ (tú, bejahend):</b> Die Form ist die 3. Person Singular, Ausnahmen wie ven (komm), di (sag), haz (mach), ten (halt). Beispiele: habla, come, escribe.</p>
+  <p class="rule"><b>Präpositionen:</b> para mí (für mich), contigo (mit dir), conmigo (mit mir).</p>`,
+  examples:['¡Habla más despacio, por favor!','Este regalo es para ti.','¿Vienes conmigo?'],
+  ex:[
+    {t:'mc', q:'¡___ más despacio, por favor!', o:['Habla','Hablas','Hable','Hablo'], a:0},
+    {t:'fill', q:'¡___ aquí! (komm her, tú-Form von venir)', a:'ven'},
+    {t:'mc', q:'Este regalo es ___. (für mich)', o:['para mí','para yo','por mí','a mí'], a:0},
+    {t:'mc', q:'Wie sagt man "mit dir"?', o:['contigo','conmigo','con mí','ti'], a:0}
+  ]
+}
+];
+
+/* ---------- WORTSCHATZ ---------- */
+// Übungen werden aus den Vokabeln automatisch erzeugt (Multiple Choice und Übersetzung)
+function vocabEx(vocab){
+  const shuffled = [...vocab].sort(()=>Math.random()-0.5).slice(0, 8);
+  return shuffled.map((v,i)=>{
+    if(i%2===0){
+      const others = vocab.map(x=>x[1]).filter(x=>x!==v[1]).sort(()=>Math.random()-0.5).slice(0,3);
+      const o = [v[1], ...others].sort(()=>Math.random()-0.5);
+      return {t:'mc', q:`Was bedeutet „${v[0]}“?`, o, a:o.indexOf(v[1]), h:`„${v[0]}“ heißt „${v[1]}“.`};
+    }
+    return {t:'fill', q:`Wie sagt man „${v[1]}“ auf Spanisch?`, a:v[0], h:`„${v[1]}“ heißt auf Spanisch „${v[0]}“.`};
+  });
+}
+function mkVocab(id, title, goal, vocab){
+  return {
+    id, title, goal,
+    rule: `<table>${vocab.map(([es,de])=>`<tr><td>${es}</td><td>${de}</td><td><button class="sound" data-say="${es}">🔊</button></td></tr>`).join('')}</table>
+      <p class="rule"><b>Tipp:</b> Lerne die Wörter laut mit Artikel, z. B. „la casa“, und höre dir jedes Wort mit 🔊 an.</p>`,
+    examples: vocab.slice(0,3).map(v=>v[0]),
+    ex: vocabEx(vocab)
+  };
+}
+
+const VOC_A1 = [
+mkVocab('va1-1','A1 · Wortschatz: Begrüßung & Small Talk','Die ersten Sätze im Gespräch',[
+  ['Hola','Hallo'],['Buenos días','Guten Morgen'],['Buenas tardes','Guten Tag / Guten Nachmittag'],['Buenas noches','Guten Abend / Gute Nacht'],
+  ['Adiós','Tschüss'],['Hasta luego','Bis später'],['Hasta mañana','Bis morgen'],['Por favor','Bitte'],['Gracias','Danke'],
+  ['De nada','Gern geschehen'],['Perdón','Entschuldigung'],['Lo siento','Es tut mir leid'],['¿Qué tal?','Wie geht’s?'],
+  ['Muy bien','Sehr gut'],['Más o menos','So lala'],['Encantado / Encantada','Freut mich']]),
+mkVocab('va1-2','A1 · Wortschatz: Familie & Personen','Über Menschen in deinem Umfeld sprechen',[
+  ['la madre','die Mutter'],['el padre','der Vater'],['el hermano','der Bruder'],['la hermana','die Schwester'],
+  ['el hijo','der Sohn'],['la hija','die Tochter'],['el abuelo','der Großvater'],['la abuela','die Großmutter'],
+  ['el tío','der Onkel'],['la tía','die Tante'],['el primo','der Cousin'],['el marido','der Ehemann'],
+  ['la mujer','die Frau'],['el amigo','der Freund']]),
+mkVocab('va1-3','A1 · Wortschatz: Essen & Trinken','Im Café und beim Einkaufen von Lebensmitteln',[
+  ['el agua','das Wasser'],['el pan','das Brot'],['la leche','die Milch'],['el café','der Kaffee'],['el té','der Tee'],
+  ['la carne','das Fleisch'],['el pescado','der Fisch'],['el pollo','das Hähnchen'],['el arroz','der Reis'],['la pasta','die Nudeln'],
+  ['la fruta','das Obst'],['la manzana','der Apfel'],['el huevo','das Ei'],['el queso','der Käse'],['la verdura','das Gemüse'],
+  ['la cerveza','das Bier'],['el vino','der Wein']]),
+mkVocab('va1-4','A1 · Wortschatz: Einkaufen & Preise','Im Geschäft nach dem Preis fragen und bezahlen',[
+  ['la tienda','das Geschäft'],['el supermercado','der Supermarkt'],['el precio','der Preis'],['barato','billig'],['caro','teuer'],
+  ['el dinero','das Geld'],['pagar','bezahlen'],['comprar','kaufen'],['¿Cuánto cuesta?','Wie viel kostet das?'],
+  ['la bolsa','die Tüte'],['el cliente','der Kunde'],['el cambio','das Wechselgeld'],['la tarjeta','die Karte'],['en efectivo','bar']]),
+mkVocab('va1-5','A1 · Wortschatz: Zuhause & Wohnung','Die eigene Wohnung beschreiben',[
+  ['la casa','das Haus'],['el piso','die Wohnung'],['la habitación','das Zimmer'],['la cocina','die Küche'],['el baño','das Bad'],
+  ['el salón','das Wohnzimmer'],['el dormitorio','das Schlafzimmer'],['la mesa','der Tisch'],['la silla','der Stuhl'],['la cama','das Bett'],
+  ['la puerta','die Tür'],['la ventana','das Fenster'],['la nevera','der Kühlschrank'],['cerca','nah'],['lejos','weit']]),
+mkVocab('va1-6','A1 · Wortschatz: Tagesablauf & Zeit','Den Alltag und Zeitangaben beschreiben',[
+  ['desayunar','frühstücken'],['almorzar','zu Mittag essen'],['cenar','zu Abend essen'],['trabajar','arbeiten'],['estudiar','lernen'],
+  ['descansar','sich ausruhen'],['dormir','schlafen'],['la mañana','der Morgen'],['la tarde','der Nachmittag'],['la noche','die Nacht'],
+  ['hoy','heute'],['ayer','gestern'],['la semana','die Woche'],['el mes','der Monat'],['el año','das Jahr'],['la hora','die Stunde']])
+];
+
+const VOC_A2 = [
+mkVocab('va2-1','A2 · Wortschatz: Gesundheit & Arzt','Krankheiten beschreiben und einen Termin machen',[
+  ['el médico','der Arzt'],['enfermo','krank'],['el dolor de cabeza','die Kopfschmerzen'],['la fiebre','das Fieber'],['la farmacia','die Apotheke'],
+  ['la medicina','das Medikament'],['la receta','das Rezept'],['la cita','der Termin'],['el resfriado','die Erkältung'],['la tos','der Husten'],
+  ['el dolor de estómago','die Bauchschmerzen'],['el hospital','das Krankenhaus'],['sentirse mal','sich schlecht fühlen'],['la ayuda','die Hilfe']]),
+mkVocab('va2-2','A2 · Wortschatz: Arbeit & Bewerbung','Über den Beruf und eine Bewerbung sprechen',[
+  ['el empleo','die Stelle'],['la entrevista','das Vorstellungsgespräch'],['el currículum','der Lebenslauf'],['el sueldo','das Gehalt'],
+  ['el horario','die Arbeitszeiten'],['el contrato','der Vertrag'],['la experiencia','die Erfahrung'],['la reunión','die Besprechung'],
+  ['el compañero de trabajo','der Kollege'],['la tarea','die Aufgabe'],['el puesto','die Position'],['la empresa','die Firma'],
+  ['el jefe','der Chef'],['las vacaciones','der Urlaub']]),
+mkVocab('va2-3','A2 · Wortschatz: Reisen & Verkehr','Am Bahnhof, Flughafen und im Hotel',[
+  ['el billete','das Ticket'],['el tren','der Zug'],['el avión','das Flugzeug'],['la reserva','die Reservierung'],['el hotel','das Hotel'],
+  ['la maleta','der Koffer'],['llegar','ankommen'],['salir','abfahren'],['el retraso','die Verspätung'],['el pasaporte','der Reisepass'],
+  ['el vuelo','der Flug'],['el autobús','der Bus'],['el equipaje','das Gepäck'],['el billete de ida y vuelta','die Hin- und Rückfahrkarte']]),
+mkVocab('va2-4','A2 · Wortschatz: Restaurant & Bestellung','Im Restaurant bestellen und bezahlen',[
+  ['la carta','die Speisekarte'],['el menú del día','das Tagesmenü'],['la cuenta','die Rechnung'],['el camarero','der Kellner'],
+  ['la propina','das Trinkgeld'],['reservar','reservieren'],['pedir','bestellen'],['el cuchillo','das Messer'],['el tenedor','die Gabel'],
+  ['la cuchara','der Löffel'],['el plato','der Teller'],['el postre','die Nachspeise'],['sin','ohne'],['con','mit']]),
+mkVocab('va2-5','A2 · Wortschatz: Wohnen & Nachbarn','Über Miete, Nachbarn und die Wohnung sprechen',[
+  ['el alquiler','die Miete'],['el vecino','der Nachbar'],['el ruido','der Lärm'],['limpiar','putzen'],['el barrio','das Viertel'],
+  ['mudarse','umziehen'],['la lavadora','die Waschmaschine'],['el ascensor','der Aufzug'],['el balcón','der Balkon'],
+  ['la calefacción','die Heizung'],['la factura','die Rechnung (Abrechnung)'],['el contrato de alquiler','der Mietvertrag'],['la comunidad','die Hausgemeinschaft']]),
+mkVocab('va2-6','A2 · Wortschatz: Gefühle & Charakter','Stimmungen und Eigenschaften beschreiben',[
+  ['contento','glücklich'],['triste','traurig'],['nervioso','nervös'],['cansado','müde'],['aburrido','gelangweilt'],['enfadado','wütend'],
+  ['sorprendido','überrascht'],['preocupado','besorgt'],['tranquilo','ruhig'],['simpático','sympathisch'],['antipático','unsympathisch'],
+  ['amable','freundlich'],['tímido','schüchtern'],['divertido','lustig']]),
+mkVocab('va2-7','A2 · Wortschatz: Telefon & Gesprächsphrasen','Am Telefon sprechen und im Alltag nachfragen',[
+  ['llamar','anrufen'],['el mensaje','die Nachricht'],['quedar','sich verabreden'],['llegar tarde','zu spät kommen'],['cancelar','absagen'],
+  ['ocupado','besetzt'],['el número de teléfono','die Telefonnummer'],['¿Diga?','Hallo? (am Telefon)'],['¿De parte de quién?','Wer spricht?'],
+  ['Un momento','Einen Moment'],['Más tarde','Später'],['Nos vemos','Wir sehen uns'],['¿Puedes repetirlo?','Kannst du das wiederholen?'],
+  ['No entiendo','Ich verstehe nicht'],['¿Cómo se dice…?','Wie sagt man …?'],['Más despacio, por favor','Langsamer, bitte']])
+];
+
+const LESSONS = [...A1, ...VOC_A1, ...A2, ...VOC_A2];
+
 /* ---------- HILFEN ---------- */
 const KEY = 'espanol-a1-progress-v1';
 let progress = JSON.parse(localStorage.getItem(KEY) || '{"done":{}}');
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(progress)); }catch(e){} }
 
-const norm = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const norm = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\p{L}\s]/gu,'').replace(/\s+/g,' ').trim();
 function say(t){
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
@@ -211,7 +440,8 @@ function buildNav(active){
   <button class="nav-btn ${active==='exam'?'active':''}" data-go="exam"><span>📝 Prüfungs-Simulation</span></button></div>` +
   LESSONS.map((L,i)=>{
     const d = progress.done[L.id];
-    return `<button class="nav-btn ${active===i?'active':''}" data-go="${i}"><span>${L.title}</span>${d!==undefined?`<span class="badge">${d}%</span>`:''}</button>`;
+    const label = L.title.startsWith('A') ? L.title : 'A1 · ' + L.title;
+    return `<button class="nav-btn ${active===i?'active':''}" data-go="${i}"><span>${label}</span>${d!==undefined?`<span class="badge">${d}%</span>`:''}</button>`;
   }).join('');
 }
 
