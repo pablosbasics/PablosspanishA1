@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Español A1/A2 – Mein Lernplan</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--text:#222;--muted:#666;--accent:#c8102e;--ok:#2e7d32;--bad:#c62828;--line:#8883}
+@media (prefers-color-scheme: dark){:root{--bg:#1b1b1f;--card:#26262c;--text:#eee;--muted:#aaa}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+header{background:var(--accent);color:#fff;padding:16px 20px}
+header h1{margin:0;font-size:1.4rem}
+header p{margin:4px 0 0;opacity:.9;font-size:.95rem}
+.wrap{display:grid;grid-template-columns:280px 1fr;gap:16px;max-width:1150px;margin:0 auto;padding:16px}
+@media (max-width:800px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+nav .nav-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin:3px 0;padding:9px 12px;border:0;border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;font-size:.92rem}
+nav .nav-btn.active{outline:2px solid var(--accent)}
+.badge{font-size:.8rem;color:var(--ok);font-weight:600;margin-left:6px;white-space:nowrap}
+.primary{background:var(--accent);color:#fff;border:0;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:1rem}
+.primary:disabled{opacity:.5;cursor:default}
+.secondary{background:var(--card);color:var(--text);border:1px solid var(--line);padding:10px 18px;border-radius:8px;cursor:pointer;font-size:1rem}
+.sound{background:none;border:1px solid var(--muted);border-radius:6px;cursor:pointer;padding:1px 8px;margin-left:6px;color:var(--text)}
+table{border-collapse:collapse;margin:8px 0;width:100%}
+td,th{padding:6px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:.9rem;color:var(--muted)}
+.opts button{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;font-size:1rem}
+.opts button:disabled{cursor:default}
+.opts button.sel{border:2px solid var(--accent)}
+input[type=text]{padding:10px;font-size:1rem;border-radius:8px;border:1px solid var(--line);width:100%;max-width:320px;background:var(--card);color:var(--text)}
+.ex{border-top:1px solid var(--line);padding:14px 0}
+.fb{margin-top:8px;font-weight:600;min-height:1.4em}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.muted{color:var(--muted)}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}
+.stat{background:var(--bg);border-radius:8px;padding:10px 14px}
+.stat b{font-size:1.3rem}
+.rule{background:var(--bg);border-left:4px solid var(--accent);padding:10px 14px;border-radius:6px;margin:12px 0}
+.step{background:var(--bg);border-radius:8px;padding:10px 14px;margin:10px 0}
+.warn{border-left:4px solid #e0a800;background:var(--bg);padding:10px 14px;border-radius:6px;margin:12px 0}
+h3{margin:18px 0 6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Español A1 / A2 – Mein Lernplan</h1>
+  <p>Grammatik verstehen, Wortschatz wiederholen, jeden Tag ein Stück weiter.</p>
+</header>
+
+<div class="wrap">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+/* =====================================================================
+   HILFSFUNKTIONEN: Täglich freischalten, Verben bilden, Übungen erzeugen
+   ===================================================================== */
+const START_KEY = 'espanol-a1-start';
+const KEY = 'espanol-a1-progress-v2';
+
+function dayOffset(){
+  let s = localStorage.getItem(START_KEY);
+  if(!s){ s = String(Date.now()); try{ localStorage.setItem(START_KEY, s); }catch(e){} }
+  return Math.max(0, Math.floor((Date.now() - Number(s)) / 86400000));
+}
+/* Jeden Tag werden neue Einträge freigeschaltet: Start mit 'base', danach 'perDay' pro Tag */
+function visible(pool, base = 6, perDay = 2){
+  return pool.slice(0, Math.min(pool.length, base + perDay * dayOffset()));
+}
+
+let progress = JSON.parse(localStorage.getItem(KEY) || '{"done":{}}');
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(progress)); }catch(e){} }
+
+const norm = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/[^\p{L}\s]/gu,'').replace(/\s+/g,' ').trim();
+
+function say(t){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang = 'es-ES'; u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+
+const PRON = ['yo','tú','él / ella / usted','nosotros','ellos / ustedes'];
+const REG_AR = ['o','as','a','amos','an'];
+const REG_ER = ['o','es','e','emos','en'];
+const REG_IR = ['o','es','e','imos','en'];
+const PRET_AR = ['é','aste','ó','amos','aron'];
+const PRET_ER = ['í','iste','ió','imos','ieron'];
+
+/* Regelmäßiges Präsens: Stamm + Endung */
+function regPres(inf){
+  const stem = inf.slice(0,-2);
+  const end = inf.endsWith('ar') ? REG_AR : inf.endsWith('er') ? REG_ER : REG_IR;
+  return end.map(e => stem + e);
+}
+/* Regelmäßiges Indefinido */
+function pretReg(inf){
+  const stem = inf.slice(0,-2);
+  return inf.endsWith('ar')
+    ? PRET_AR.map(e => stem + e)
+    : PRET_ER.map(e => stem + e);
+}
+
+/* Verb-Übungen: Person und Verb zufällig, Antwort = richtige Form */
+function verbEx(items){
+  if(!items.length) return [];
+  return Array.from({length:8}, (_,i)=>{
+    const v = items[Math.floor(Math.random()*items.length)];
+    const k = Math.floor(Math.random()*5);
+    const q = `${PRON[k]} ___ (${v.inf} – ${v.de})`;
+    if(i % 2 === 0){
+      const opts = [...new Set(v.f)].sort(()=>Math.random()-0.5);
+      return {t:'mc', q, o:opts, a:opts.indexOf(v.f[k]), h:`Richtig: „${v.f[k]}“`};
+    }
+    return {t:'fill', q, a:v.f[k], h:`Richtig: „${v.f[k]}“`};
+  });
+}
+
+/* Vokabel-Übungen: Bedeutung erkennen und Übersetzung eingeben */
+function vocabEx(vocab){
+  const picked = [...vocab].sort(()=>Math.random()-0.5).slice(0, 8);
+  return picked.map((v,i)=>{
+    if(i % 2 === 0){
+      const others = vocab.map(x=>x[1]).filter(x=>x!==v[1]).sort(()=>Math.random()-0.5).slice(0,3);
+      const o = [v[1], ...others].sort(()=>Math.random()-0.5);
+      return {t:'mc', q:`Was bedeutet „${v[0]}“?`, o, a:o.indexOf(v[1]), h:`„${v[0]}“ heißt „${v[1]}“.`};
+    }
+    return {t:'fill', q:`Wie sagt man „${v[1]}“ auf Spanisch?`, a:v[0], h:`„${v[1]}“ heißt auf Spanisch „${v[0]}“.`};
+  });
+}
+
+/* Liefert die Übungen einer Lektion (bei Vokabel- und Verb-Lektionen dynamisch) */
+function getEx(L){
+  if(L.type === 'vocab') return vocabEx(visible(L.pool));
+  if(L.type === 'verb') return verbEx(visible(L.pool, 4));
+  return L.ex || [];
+}
+
+/* =====================================================================
+   GRAMMATIK A1
+   ===================================================================== */
+const A1_GRAMMAR = [
+{
+  id:'l0', title:'0. Artikel erkennen: bestimmt & unbestimmt', goal:'Der, die, das bzw. el, la, los, las – und ein, eine bzw. un, una, unos, unas',
+  rule:`
+  <h3>Warum Artikel so wichtig sind</h3>
+  <p>Im Deutschen sagst du "der Tisch", "die Lampe", "das Buch". Im Spanischen gibt es nur <b>zwei</b> Geschlechter: maskulin und feminin. Jedes Nomen hat also ein festes Geschlecht, und der Artikel verrät es dir. Wenn du den Artikel immer mitlernst, sprichst du von Anfang an richtig.</p>
+
+  <h3>Bestimmter Artikel: el, la, los, las</h3>
+  <p>Er steht für etwas Bekanntes oder Bestimmtes: <i>„die Mesa (die Tisch in diesem Raum)“</i>.</p>
+  <table>
+    <tr><th></th><th>Singular</th><th>Plural</th></tr>
+    <tr><td>maskulin</td><td>el libro (das Buch)</td><td>los libros (die Bücher)</td></tr>
+    <tr><td>feminin</td><td>la casa (das Haus)</td><td>las casas (die Häuser)</td></tr>
+  </table>
+
+  <h3>Unbestimmter Artikel: un, una, unos, unas</h3>
+  <p>Er steht für etwas Neues oder Nicht-Bestimmtes: <i>„ein Buch“, „eine Tasche“</i>.</p>
+  <table>
+    <tr><th></th><th>Singular</th><th>Plural</th></tr>
+    <tr><td>maskulin</td><td>un libro (ein Buch)</td><td>unos libros (einige Bücher)</td></tr>
+    <tr><td>feminin</td><td>una casa (ein Haus)</td><td>unas casas (einige Häuser)</td></tr>
+  </table>
+
+  <div class="step"><b>Faustregel für bestimmt oder unbestimmt:</b><br>
+  Kennt ihr das Ding schon (Gesprächsthema, Kontext)? → <b>el / la</b>. Ist es neu, irgendeins von vielen? → <b>un / una</b>.<br>
+  Beispiel: „Ich habe <i>ein</i> Auto.“ = <b>Tengo un coche.</b> – „<i>Das</i> Auto ist rot.“ = <b>El coche es rojo.</b></div>
+
+  <h3>Das Geschlecht erkennen</h3>
+  <p><b>Maskulin</b> sind meist:</p>
+  <ul>
+    <li>Wörter auf <b>-o</b>: el libro, el tiempo, el dinero</li>
+    <li>Wörter auf <b>-or</b>, <b>-aje</b>, <b>-ma</b>: el amor, el viaje, el problema, el idioma</li>
+  </ul>
+  <p><b>Feminin</b> sind meist:</p>
+  <ul>
+    <li>Wörter auf <b>-a</b>: la casa, la mesa, la mañana</li>
+    <li>Wörter auf <b>-ción</b>, <b>-sión</b>, <b>-dad</b>, <b>-tad</b>, <b>-umbre</b>: la canción, la televisión, la ciudad, la verdad</li>
+  </ul>
+  <div class="warn"><b>Achtung:</b> Es gibt Ausnahmen. <i>el problema</i> und <i>el idioma</i> enden auf -a, sind aber maskulin. Wörter auf -e oder Konsonant musst du mit dem Artikel lernen: <i>la calle, la noche, el hotel, el móvil</i>. Lerne also immer „el hotel“, nicht nur „hotel“.</div>
+
+  <h3>Betonte Anfangs-a</h3>
+  <p>Beginnt ein feminines Wort mit betontem a- oder ha-, steht im Singular <b>el</b> statt <b>la</b>: <i>el agua (das Wasser)</i>, <i>el águila (der Adler)</i>. Im Plural bleibt es <b>las</b>: <i>las aguas</i>. Der Artikel ändert sich nur für die Aussprache, das Wort bleibt feminin. Deshalb sagt man auch <i>un agua</i> und <i>una agua</i> ist nicht üblich.</p>
+
+  <h3>Plural bilden</h3>
+  <ul>
+    <li>Endet das Wort auf <b>Vokal</b>: <b>+s</b> → el libro → los libros</li>
+    <li>Endet es auf <b>Konsonant</b>: <b>+es</b> → el lápiz → los lápices, la ciudad → las ciudades</li>
+  </ul>
+
+  <h3>Verschmelzungen</h3>
+  <p>Mit <i>a</i> und <i>de</i> verschmelzen die Formen mit <i>el</i> (nicht mit <i>la</i>, <i>los</i>, <i>las</i>):</p>
+  <table>
+    <tr><td>a + el = <b>al</b></td><td>Voy al cine. (Ich gehe ins Kino.)</td></tr>
+    <tr><td>de + el = <b>del</b></td><td>Es el libro del profesor. (Es ist das Buch des Lehrers.)</td></tr>
+    <tr><td>a + la / de la</td><td>Voy a la playa. / Es la casa de la familia. (keine Verschmelzung)</td></tr>
+  </table>
+
+  <h3>Ohne Artikel</h3>
+  <p>Im Spanischen fällt der Artikel öfter weg als im Deutschen:</p>
+  <ul>
+    <li>Sprachen: <i>Hablo español.</i> (Ich spreche Spanisch.)</li>
+    <li>Berufe nach <i>ser</i>: <i>Soy profesor.</i> (Ich bin Lehrer.)</li>
+    <li>Nach <i>tener</i> bei unbestimmten Mengen: <i>Tengo hermanos.</i> (Ich habe Geschwister.)</li>
+  </ul>
+  <p class="rule"><b>Merke:</b> Bei <i>gustar</i> und <i>encantar</i> steht dagegen fast immer der bestimmte Artikel: <i>Me gusta el café.</i> (Ich mag Kaffee.)</p>`,
+  examples:['La mesa es grande.','Tengo un coche rojo.','Me gustan las manzanas.','Voy al cine con el profesor.'],
+  ex:[
+    {t:'mc', q:'___ mesa es grande. (Der Tisch … )', o:['El','La','Los','Las'], a:1, h:'„mesa“ ist feminin, also „la mesa“.'},
+    {t:'mc', q:'Quiero ___ café, por favor. (Ich möchte einen Kaffee)', o:['un','una','el','los'], a:0, h:'„café“ ist maskulin, unbestimmt: „un café“.'},
+    {t:'mc', q:'___ problema es difícil. (Das Problem … )', o:['El','La','Los','Una'], a:0, h:'Trotz der Endung -a ist „problema“ maskulin.'},
+    {t:'fill', q:'Plural von „el día“ mit Artikel: ___ días (die Tage)', a:'los', h:'Der Artikel im Plural maskulin ist „los“.'},
+    {t:'mc', q:'Wie verschmilzt „a + el“?', o:['al','del','ael','a el'], a:0},
+    {t:'mc', q:'Wie verschmilzt „de + el“?', o:['del','al','de el','dela'], a:0},
+    {t:'mc', q:'Soy ___ profesor. (Ich bin Lehrer)', o:['(kein Artikel)','un','el','una'], a:0, h:'Berufe nach „ser“ stehen ohne Artikel.'},
+    {t:'fill', q:'Me gusta ___ (die Musik). Schreibe mit Artikel.', a:'la música', h:'Bei „gustar“ steht der bestimmte Artikel.'}
+  ]
+},
+{
+  id:'l1', title:'1. ser – Wer bin ich?', goal:'Identität, Herkunft, Beruf, Eigenschaften beschreiben',
+  rule:`
+  <h3>Konjugation von ser</h3>
+  <table>
+    <tr><th>Person</th><th>ser</th><th>Beispiel</th></tr>
+    <tr><td>yo</td><td>soy</td><td>Soy de Alemania. (Ich bin aus Deutschland.)</td></tr>
+    <tr><td>tú</td><td>eres</td><td>Eres muy simpático. (Du bist sehr sympathisch.)</td></tr>
+    <tr><td>él / ella / usted</td><td>es</td><td>Ella es profesora. (Sie ist Lehrerin.)</td></tr>
+    <tr><td>nosotros</td><td>somos</td><td>Somos amigos. (Wir sind Freunde.)</td></tr>
+    <tr><td>ellos / ustedes</td><td>son</td><td>Son estudiantes. (Sie sind Studenten.)</td></tr>
+  </table>
+
+  <h3>Wann benutzt man ser?</h3>
+  <p><i>Ser</i> beschreibt, was etwas <b>von Natur aus</b> ist. Dazu gehören:</p>
+  <ul>
+    <li><b>Identität und Name:</b> Soy Lucas. (Ich bin Lucas.)</li>
+    <li><b>Herkunft:</b> Somos de Hannover. (Wir sind aus Hannover.)</li>
+    <li><b>Beruf:</b> Soy estudiante. (Ich bin Student.)</li>
+    <li><b>Dauerhafte Eigenschaften:</b> Mi hermana es alta. (Meine Schwester ist groß.)</li>
+    <li><b>Uhrzeit und Datum:</b> Son las tres. (Es ist drei Uhr.) Hoy es lunes. (Heute ist Montag.)</li>
+    <li><b>Material und Besitz:</b> La mesa es de madera. (Der Tisch ist aus Holz.) Es mi libro. (Es ist mein Buch.)</li>
+  </ul>
+
+  <div class="step"><b>Merkhilfe:</b> Frage dich: „Ist das eine Eigenschaft, die bleibt?“ Dann <i>ser</i>. Bei Zustand und Ort gilt <i>estar</i> (siehe nächste Lektion).</div>
+
+  <h3>Satzbau</h3>
+  <p>Im Spanischen darfst du das Subjekt weglassen, weil die Verbform schon zeigt, wer gemeint ist: <i>Soy alemán.</i> statt <i>Yo soy alemán.</i> Das „yo“ benutzt man nur zur Betonung: <i>Yo soy alemán, ¿y tú?</i> (Ich bin Deutscher, und du?)</p>
+  <p class="rule"><b>Achtung:</b> Die Adjektive stimmen mit dem Nomen überein: <i>Es alto.</i> (Er ist groß.) <i>Es alta.</i> (Sie ist groß.)</p>`,
+  examples:['Soy de Alemania.','Ella es profesora.','Somos amigos.','Hoy es lunes.'],
+  ex:[
+    {t:'mc', q:'Yo ___ alemán.', o:['soy','eres','es','son'], a:0},
+    {t:'fill', q:'Nosotros ___ amigos. (ser)', a:'somos'},
+    {t:'mc', q:'Ellos ___ estudiantes.', o:['somos','son','sois','eres'], a:1},
+    {t:'mc', q:'Son ___ tres. (Es ist drei Uhr)', o:['las','los','el','la'], a:0, h:'Bei der Uhrzeit: „son las“ (Plural), außer bei „es la una“.'}
+  ]
+},
+{
+  id:'l2', title:'2. estar & ser oder estar?', goal:'Zustände und Orte von dauerhaften Eigenschaften unterscheiden',
+  rule:`
+  <h3>Konjugation von estar</h3>
+  <table>
+    <tr><th>Person</th><th>estar</th><th>Beispiel</th></tr>
+    <tr><td>yo</td><td>estoy</td><td>Estoy en casa. (Ich bin zu Hause.)</td></tr>
+    <tr><td>tú</td><td>estás</td><td>¿Cómo estás? (Wie geht es dir?)</td></tr>
+    <tr><td>él / ella / usted</td><td>está</td><td>Madrid está en España.</td></tr>
+    <tr><td>nosotros</td><td>estamos</td><td>Estamos cansados. (Wir sind müde.)</td></tr>
+    <tr><td>ellos / ustedes</td><td>están</td><td>Están en la cocina. (Sie sind in der Küche.)</td></tr>
+  </table>
+
+  <h3>Die zwei Grundfragen</h3>
+  <p><b>Wo bin ich?</b> → <i>estar</i> (Ort und Lage). <b>Wie bin ich gerade?</b> → <i>estar</i> (Zustand, Stimmung, Gesundheit).</p>
+  <p><b>Was bin ich?</b> → <i>ser</i> (dauerhaft, Identität).</p>
+
+  <h3>Das gleiche Adjektiv, zwei Bedeutungen</h3>
+  <table>
+    <tr><th>Mit ser</th><th>Mit estar</th></tr>
+    <tr><td>Él es aburrido. (Er ist langweilig – sein Charakter)</td><td>Él está aburrido. (Er ist gelangweilt – gerade so)</td></tr>
+    <tr><td>Ella es lista. (Sie ist klug.)</td><td>Ella está lista. (Sie ist fertig/bereit.)</td></tr>
+    <tr><td>Soy nervioso. (Ich bin ein nervöser Typ.)</td><td>Estoy nervioso. (Ich bin gerade nervös.)</td></tr>
+  </table>
+
+  <div class="step"><b>Merke:</b> Mit <i>estar</i> sagst du, wie etwas <b>im Moment</b> ist. Mit <i>ser</i> sagst du, wie etwas <b>grundsätzlich</b> ist.</div>
+
+  <h3>Typische Redewendungen mit estar</h3>
+  <ul>
+    <li><i>¿Cómo estás?</i> (Wie geht es dir?) – <i>Estoy bien.</i> (Mir geht es gut.)</li>
+    <li><i>¿Dónde estás?</i> (Wo bist du?) – <i>Estoy en la oficina.</i> (Ich bin im Büro.)</li>
+    <li><i>Estar de vacaciones</i> (im Urlaub sein), <i>estar en casa</i> (zu Hause sein)</li>
+  </ul>`,
+  examples:['Estoy en casa.','¿Cómo estás?','Madrid está en España.','Él es aburrido. / Él está aburrido.'],
+  ex:[
+    {t:'mc', q:'¿Cómo ___ tú? (Wie geht es dir?)', o:['estás','eres','estoy','son'], a:0},
+    {t:'fill', q:'Madrid ___ en España. (Lage)', a:'está'},
+    {t:'mc', q:'Yo ___ cansado (heute, gerade).', o:['soy','estoy','es','son'], a:1},
+    {t:'mc', q:'Mi hermano ___ alto. (Eigenschaft)', o:['está','es','estás','están'], a:1},
+    {t:'mc', q:'Ella ___ lista. (fertig, bereit)', o:['es','está','son','estoy'], a:1, h:'Fertig/bereit sein ist ein Zustand: estar.'}
+  ]
+},
+{
+  id:'l3', title:'3. Nomen: Genus & Plural vertiefen', goal:'Das Geschlecht von Nomen sicher bestimmen',
+  rule:`
+  <p>Lektion 0 hat dir die Artikel erklärt. Hier übst du das Geschlecht der Nomen. Im Spanischen ist das Geschlecht bei fast allen Nomen festgelegt. Die Adjektive richten sich danach.</p>
+  <table>
+    <tr><th>Endung</th><th>meist</th><th>Beispiele</th></tr>
+    <tr><td>-o</td><td>maskulin</td><td>el libro, el coche, el tiempo</td></tr>
+    <tr><td>-a</td><td>feminin</td><td>la mesa, la mujer, la semana</td></tr>
+    <tr><td>-ción / -dad</td><td>feminin</td><td>la nación, la ciudad</td></tr>
+    <tr><td>-e / Konsonant</td><td>unterschiedlich</td><td>el café, la calle, el hotel</td></tr>
+  </table>
+  <h3>Personen mit Geschlecht</h3>
+  <p>Bei Personen folgt das Geschlecht der Person: <i>el amigo</i> (der Freund) / <i>la amiga</i> (die Freundin). Berufe auf -e und -ista bleiben gleich, nur der Artikel ändert sich: <i>el / la estudiante</i>, <i>el / la turista</i>.</p>
+  <div class="warn"><b>Wichtig:</b> Wörter auf -e und -ista sind nicht festgelegt. Lerne sie immer mit Artikel.</div>`,
+  examples:['La amiga de mi hermana.','El turista habla inglés.'],
+  ex:[
+    {t:'mc', q:'Welches Wort ist feminin?', o:['el problema','la mano','el día','el mapa'], a:1, h:'„la mano“ (die Hand) ist feminin. Sie endet auf -o, ist aber eine der bekannten Ausnahmen. Solche Wörter lernst du am besten mit Artikel.'},
+    {t:'mc', q:'Der Plural von „la ciudad“ ist:', o:['las ciudades','las ciudads','los ciudades','las ciudadas'], a:0},
+    {t:'fill', q:'Wie sagt man „die Freundin“ auf Spanisch?', a:'la amiga'},
+    {t:'mc', q:'„El turista“ und „la turista“ bedeuten:', o:['der / die Tourist/in','der Tourismus','das Hotel','die Reise'], a:0}
+  ]
+},
+{
+  id:'l4', title:'4. Präsens – regelmäßige Verben', goal:'Verben auf -ar, -er, -ir bilden',
+  rule:`
+  <h3>Die drei Verbgruppen</h3>
+  <p>Jedes regelmäßige Verb hat im Infinitiv eine Endung: <b>-ar</b>, <b>-er</b> oder <b>-ir</b>. Diese Endung wird abgeschnitten, und der <b>Stamm</b> bleibt. Dann kommt die neue Endung dazu.</p>
+  <table>
+    <tr><th>Person</th><th>hablar (-ar)<br>sprechen</th><th>comer (-er)<br>essen</th><th>vivir (-ir)<br>wohnen</th></tr>
+    <tr><td>yo</td><td>hablo</td><td>como</td><td>vivo</td></tr>
+    <tr><td>tú</td><td>hablas</td><td>comes</td><td>vives</td></tr>
+    <tr><td>él / ella / usted</td><td>habla</td><td>come</td><td>vive</td></tr>
+    <tr><td>nosotros</td><td>hablamos</td><td>comemos</td><td>vivimos</td></tr>
+    <tr><td>ellos / ustedes</td><td>hablan</td><td>comen</td><td>viven</td></tr>
+  </table>
+  <div class="step"><b>Vorgehen in drei Schritten:</b><br>
+  1. Infinitiv nehmen: <i>hablar</i><br>
+  2. Stamm bestimmen: <i>habl-</i> (Infinitiv ohne -ar)<br>
+  3. Endung passend zur Person anhängen: <i>yo habl + o = hablo</i></div>
+
+  <h3>Die Besonderheit bei der Person „tú“</h3>
+  <p>Die Form für <i>tú</i> endet immer auf <b>-s</b>: hablas, comes, vives. Du erkennst das „du“ also am -s.</p>
+
+  <h3>Wichtig: Das Subjekt ist oft unnötig</h3>
+  <p>Die Verbendung zeigt die Person. <i>Hablo español.</i> reicht völlig, <i>Yo hablo español</i> wirkt betonter (Ich spreche Spanisch, nicht du).</p>
+
+  <h3>Verneinung</h3>
+  <p>Das <i>no</i> steht direkt vor dem Verb: <i>No hablo francés.</i> (Ich spreche kein Französisch.) <i>No vivo aquí.</i> (Ich wohne nicht hier.)</p>`,
+  examples:['Yo hablo español.','¿Tú comes carne?','Ellos viven en Berlín.','No trabajo los domingos.'],
+  ex:[
+    {t:'fill', q:'Yo ___ (hablar)', a:'hablo'},
+    {t:'mc', q:'Tú ___ (comer)', o:['como','comes','come','comen'], a:1},
+    {t:'fill', q:'Nosotros ___ (vivir)', a:'vivimos'},
+    {t:'mc', q:'Ella ___ (trabajar)', o:['trabaja','trabajas','trabajan','trabajo'], a:0},
+    {t:'mc', q:'Wie verneint man „Ich arbeite“?', o:['No trabajo.','Trabajo no.','No trabaja.','Yo no trabajo no.'], a:0}
+  ]
+},
+{
+  id:'l5', title:'5. Wichtige unregelmäßige Verben (Präsens)', goal:'tener, ir, hacer, poder, querer und andere häufige Verben',
+  rule:`
+  <p>Unregelmäßige Verben ändern im Präsens den Stamm oder haben eigene Formen. Die wichtigsten musst du auswendig können, weil du sie ständig brauchst.</p>
+  <table>
+    <tr><th>Person</th><th>tener<br>haben</th><th>ir<br>gehen</th><th>hacer<br>machen</th><th>poder<br>können</th></tr>
+    <tr><td>yo</td><td>tengo</td><td>voy</td><td>hago</td><td>puedo</td></tr>
+    <tr><td>tú</td><td>tienes</td><td>vas</td><td>haces</td><td>puedes</td></tr>
+    <tr><td>él / ella / usted</td><td>tiene</td><td>va</td><td>hace</td><td>puede</td></tr>
+    <tr><td>nosotros</td><td>tenemos</td><td>vamos</td><td>hacemos</td><td>podemos</td></tr>
+    <tr><td>ellos / ustedes</td><td>tienen</td><td>van</td><td>hacen</td><td>pueden</td></tr>
+  </table>
+  <h3>Drei Arten von Unregelmäßigkeit</h3>
+  <ul>
+    <li><b>Stammvokal ändert sich</b> (e → ie, o → ue, e → i): <i>tener → tienes</i>, <i>poder → puedes</i>. Die Änderung passiert in allen Formen außer <i>nosotros</i> und <i>vosotros</i>.</li>
+    <li><b>Yo-Form ist anders:</b> <i>hacer → hago</i>, <i>venir → vengo</i>, <i>decir → digo</i>, <i>saber → sé</i>.</li>
+    <li><b>Komplett eigene Formen:</b> <i>ir → voy / vas / va</i>, <i>ser / estar</i> (siehe oben).</li>
+  </ul>
+  <div class="step"><b>Tipp:</b> Lerne unregelmäßige Verben immer in Sätzen: <i>Tengo tres hermanos.</i> <i>Voy al parque.</i> <i>¿Qué haces hoy?</i> <i>¿Puedes venir?</i></div>
+  <p><b>Weitere wichtige Verben:</b> venir (kommen), decir (sagen), saber (wissen / können), ver (sehen), dar (geben), pensar (denken), entender (verstehen), empezar (anfangen). Sie stehen im Verbtraining.</p>`,
+  examples:['Tengo tres hermanos.','Vamos al parque.','¿Qué haces hoy?','¿Puedes venir mañana?'],
+  ex:[
+    {t:'fill', q:'Yo ___ (tener) un perro.', a:'tengo'},
+    {t:'mc', q:'Ellos ___ (ir) al cine.', o:['va','vamos','van','voy'], a:2},
+    {t:'fill', q:'¿Qué ___ (hacer) tú?', a:'haces'},
+    {t:'mc', q:'Yo ___ (poder) nadar.', o:['puedo','puede','podemos','pueden'], a:0},
+    {t:'mc', q:'Nosotros ___ (querer) ir. (Stammvokal ändert sich)', o:['queremos','quiero','quieres','quieren'], a:0}
+  ]
+},
+{
+  id:'l6', title:'6. gustar', goal:'Vorlieben ausdrücken',
+  rule:`
+  <h3>Das Prinzip</h3>
+  <p>Im Deutschen sagt man „<b>Ich mag</b> Kaffee“. Im Spanischen sagt man wörtlich „<b>Mir gefällt</b> der Kaffee“. Das Ding, das gefällt, ist das Subjekt. Deshalb richtet sich das Verb nach dem Ding, nicht nach der Person.</p>
+  <table>
+    <tr><th>Person</th><th>+ Singular</th><th>+ Plural</th><th>Beispiel</th></tr>
+    <tr><td>me (mir)</td><td>me gusta</td><td>me gustan</td><td>Me gusta el café. / Me gustan los perros.</td></tr>
+    <tr><td>te (dir)</td><td>te gusta</td><td>te gustan</td><td>¿Te gusta bailar?</td></tr>
+    <tr><td>le (ihm / ihr / Ihnen)</td><td>le gusta</td><td>le gustan</td><td>A ella le gusta leer.</td></tr>
+  </table>
+  <h3>Zusätzliche Regeln</h3>
+  <ul>
+    <li>Das Verb steht im Singular, wenn etwas gefällt: <i>Me gusta</i>, und im Plural: <i>Me gustan</i>.</li>
+    <li>Verben im Infinitiv: <i>Me gusta bailar.</i> (Ich tanze gern.)</li>
+    <li>Verdeutlichung mit a: <i>A mí me gusta el fútbol.</i> (Mir gefällt Fußball.) <i>A ella le gusta.</i> (Ihr gefällt es.)</li>
+  </ul>
+  <div class="warn"><b>Typischer Fehler:</b> „Yo gusto el café“ ist falsch. Richtig: <i>Me gusta el café.</i> Das „me“ steht vor dem Verb, das „yo“ fehlt.</div>`,
+  examples:['Me gusta el café.','Me gustan los perros.','¿Te gusta bailar?','A ella le gustan los libros.'],
+  ex:[
+    {t:'mc', q:'A mí ___ el fútbol.', o:['me gusta','me gustan','gusto','gustas'], a:0},
+    {t:'fill', q:'Me ___ las manzanas. (gustar, Plural)', a:'gustan'},
+    {t:'mc', q:'¿Te ___ la música?', o:['gusta','gustan','gustas','gusto'], a:0},
+    {t:'mc', q:'A ella ___ los libros.', o:['le gustan','le gusta','les gustan','me gusta'], a:0}
+  ]
+},
+{
+  id:'l7', title:'7. Possessivbegleiter & Adjektive', goal:'mi, tu, su und Adjektivendungen richtig anpassen',
+  rule:`
+  <h3>Possessivbegleiter (vor dem Nomen)</h3>
+  <table>
+    <tr><th></th><th>Singular</th><th>Plural</th><th>Beispiel</th></tr>
+    <tr><td>mein</td><td>mi</td><td>mis</td><td>mi casa, mis casas</td></tr>
+    <tr><td>dein</td><td>tu</td><td>tus</td><td>tu libro, tus libros</td></tr>
+    <tr><td>sein / ihr / Ihr</td><td>su</td><td>sus</td><td>su madre, sus madres</td></tr>
+  </table>
+  <p>Der Possessivbegleiter richtet sich nach dem <b>Besitzobjekt</b>, nicht nach dem Besitzer. <i>Su casa</i> kann „sein Haus“, „ihr Haus“ oder „Ihr Haus“ heißen. Der Kontext klärt es.</p>
+
+  <h3>Adjektive: Endungen</h3>
+  <p>Adjektive stimmen mit dem Nomen in Geschlecht und Zahl überein:</p>
+  <table>
+    <tr><th></th><th>Singular</th><th>Plural</th></tr>
+    <tr><td>maskulin</td><td>alto / rojo</td><td>altos / rojos</td></tr>
+    <tr><td>feminin</td><td>alta / roja</td><td>altas / rojas</td></tr>
+  </table>
+  <div class="step"><b>Regel:</b> Endet das Adjektiv auf -o, wird es feminin zu -a. Endet es auf -e oder Konsonant, bleibt es gleich: <i>grande</i> (maskulin und feminin), <i>los hoteles grandes</i> (Plural +s oder +es).</div>
+
+  <h3>Stellung der Adjektive</h3>
+  <p>Adjektive stehen meist <b>nach</b> dem Nomen: <i>un coche rojo</i> (ein rotes Auto). Stehen sie vor dem Nomen, betonen sie etwas Typisches: <i>una buena idea</i> (eine gute Idee), <i>un gran día</i> (ein großartiger Tag).</p>`,
+  examples:['Mi madre es simpática.','Mis hermanos son altos.','Un coche rojo.','Una casa grande.'],
+  ex:[
+    {t:'mc', q:'___ madre es simpática.', o:['Mi','Mis','Tu','Sus'], a:0},
+    {t:'fill', q:'Las casas son ___ (grande, Plural)', a:'grandes'},
+    {t:'mc', q:'Un coche ___ (rot)', o:['rojo','roja','rojos','rojas'], a:0},
+    {t:'fill', q:'Mis hermanas son ___ (alto)', a:'altas'}
+  ]
+},
+{
+  id:'l8', title:'8. Fragen & Verneinung', goal:'Fragen stellen und Sätze verneinen',
+  rule:`
+  <h3>Fragewörter (immer mit Akzent!)</h3>
+  <table>
+    <tr><th>Frage</th><th>Bedeutung</th><th>Beispiel</th></tr>
+    <tr><td>¿Qué?</td><td>Was?</td><td>¿Qué haces? (Was machst du?)</td></tr>
+    <tr><td>¿Dónde?</td><td>Wo?</td><td>¿Dónde vives? (Wo wohnst du?)</td></tr>
+    <tr><td>¿Cuándo?</td><td>Wann?</td><td>¿Cuándo llegas? (Wann kommst du an?)</td></tr>
+    <tr><td>¿Cómo?</td><td>Wie?</td><td>¿Cómo estás? (Wie geht es dir?)</td></tr>
+    <tr><td>¿Cuánto / Cuántos?</td><td>Wie viel(e)?</td><td>¿Cuántos años tienes? (Wie alt bist du?)</td></tr>
+    <tr><td>¿Quién?</td><td>Wer?</td><td>¿Quién es? (Wer ist das?)</td></tr>
+    <tr><td>¿Por qué?</td><td>Warum?</td><td>¿Por qué estudias? (Warum lernst du?)</td></tr>
+  </table>
+  <div class="step"><b>Merke:</b> Die Fragewörter tragen immer einen Akzent. Das Fragezeichen steht vor und nach dem Satz: <i>¿Dónde vives?</i></div>
+
+  <h3>Verneinung</h3>
+  <p>Das Spanische verneint mit <b>no</b> direkt vor dem Verb: <i>No hablo francés.</i> Ein doppeltes Nein ist normal und richtig: <i>No tengo nada.</i> (Ich habe nichts.) Im Deutschen wäre das „Ich habe nichts“, im Spanischen zweimal verneint.</p>
+
+  <h3>Ja-/Nein-Fragen</h3>
+  <p>Eine Frage kannst du nur durch die Betonung stellen: <i>¿Hablas español?</i> (Sprichst du Spanisch?) Die Wortstellung bleibt wie beim Aussagesatz.</p>`,
+  examples:['¿Dónde vives?','¿Cuántos años tienes?','No hablo francés.','No tengo nada.'],
+  ex:[
+    {t:'mc', q:'¿___ vives? (Wo wohnst du?)', o:['Dónde','Cuándo','Quién','Cuál'], a:0},
+    {t:'mc', q:'¿___ años tienes? (Wie alt bist du?)', o:['Cuántos','Cuántas','Qué','Cuándo'], a:0},
+    {t:'fill', q:'Schreibe mit no: „Ich spreche kein Spanisch“', a:'no hablo español', alt:['no hablo espanol']},
+    {t:'mc', q:'Welches Fragewort heißt „Warum?“', o:['¿Por qué?','¿Para qué?','¿Cuál?','¿Quién?'], a:0}
+  ]
+},
+{
+  id:'l9', title:'9. Zahlen, hay & Uhrzeit', goal:'Zahlen, Mengen und Zeitangaben',
+  rule:`
+  <h3>Zahlen 0 bis 20</h3>
+  <p>0 cero · 1 uno · 2 dos · 3 tres · 4 cuatro · 5 cinco · 6 seis · 7 siete · 8 ocho · 9 nueve · 10 diez · 11 once · 12 doce · 13 trece · 14 catorce · 15 quince · 16 dieciséis · 17 diecisiete · 18 dieciocho · 19 diecinueve · 20 veinte</p>
+  <p>Ab 21 schreibt man zusammen oder mit y: <i>veintiuno / veinte y uno</i>. Vorsicht: <i>uno</i> wird vor Nomen zu <i>un</i>: <i>un libro</i>, aber <i>veintiún libros</i>.</p>
+
+  <h3>hay (es gibt)</h3>
+  <p><i>Hay</i> bedeutet „es gibt“ und ist für Singular und Plural gleich: <i>Hay un libro. / Hay dos libros.</i> Es wird nie konjugiert. Die Frage lautet <i>¿Hay …?</i> (Gibt es …?). Vergiss das Subjekt nicht im Deutschen: „Es gibt zwei Bücher“ heißt hier wörtlich „Hay dos libros“.</p>
+
+  <h3>Uhrzeit</h3>
+  <table>
+    <tr><th>Uhrzeit</th><th>Spanisch</th></tr>
+    <tr><td>1:00</td><td>Es la una.</td></tr>
+    <tr><td>2:00 bis 12:00</td><td>Son las dos / las doce.</td></tr>
+    <tr><td>Halb (3:30)</td><td>Son las tres y media.</td></tr>
+    <tr><td>Viertel vor (2:45)</td><td>Son las tres menos cuarto.</td></tr>
+  </table>
+  <p class="rule"><b>Merke:</b> Die Frage lautet <i>¿Qué hora es?</i> (Wie spät ist es?) Nur bei 1 Uhr steht <i>es la una</i>, sonst <i>son las</i>.</p>
+
+  <h3>Wochentage</h3>
+  <p>lunes (Montag), martes, miércoles, jueves, viernes, sábado, domingo. Sie sind maskulin und werden klein geschrieben. <i>El lunes</i> bedeutet „am Montag“ (eine bestimmte Aktion), <i>los lunes</i> heißt „montags“ (regelmäßig).</p>`,
+  examples:['Hay dos libros en la mesa.','Son las tres y media.','El lunes trabajo.','Los domingos descanso.'],
+  ex:[
+    {t:'fill', q:'7 + 5 = ? (auf Spanisch)', a:'doce'},
+    {t:'mc', q:'„veinte“ bedeutet:', o:['20','12','30','2'], a:0},
+    {t:'mc', q:'Hay ___ libros.', o:['un','una','dos'], a:2, h:'„libros“ ist maskulin Plural. „Hay“ bleibt immer gleich.'},
+    {t:'mc', q:'Wie sagt man „Es ist ein Uhr“?', o:['Es la una.','Son la una.','Es las una.','Son uno.'], a:0}
+  ]
+}
+];
+
+/* =====================================================================
+   VERBEN A1 (regelmäßig und unregelmäßig)
+   ===================================================================== */
+const VERBS_A1_REG = [
+  {inf:'hablar', de:'sprechen'}, {inf:'comer', de:'essen'}, {inf:'vivir', de:'wohnen / leben'},
+  {inf:'trabajar', de:'arbeiten'}, {inf:'estudiar', de:'studieren / lernen'}, {inf:'escuchar', de:'hören'},
+  {inf:'necesitar', de:'brauchen'}, {inf:'beber', de:'trinken'}, {inf:'aprender', de:'lernen'},
+  {inf:'escribir', de:'schreiben'}, {inf:'comprar', de:'kaufen'}, {inf:'bailar', de:'tanzen'},
+  {inf:'cocinar', de:'kochen'}, {inf:'abrir', de:'öffnen'}
+].map(v => ({...v, f: regPres(v.inf)}));
+
+const VERBS_A1_IRR = [
+  {inf:'tener', de:'haben', f:['tengo','tienes','tiene','tenemos','tienen']},
+  {inf:'ir', de:'gehen', f:['voy','vas','va','vamos','van']},
+  {inf:'hacer', de:'machen', f:['hago','haces','hace','hacemos','hacen']},
+  {inf:'poder', de:'können', f:['puedo','puedes','puede','podemos','pueden']},
+  {inf:'querer', de:'wollen / mögen', f:['quiero','quieres','quiere','queremos','quieren']},
+  {inf:'venir', de:'kommen', f:['vengo','vienes','viene','venimos','vienen']},
+  {inf:'decir', de:'sagen', f:['digo','dices','dice','decimos','dicen']},
+  {inf:'saber', de:'wissen', f:['sé','sabes','sabe','sabemos','saben']},
+  {inf:'ver', de:'sehen', f:['veo','ves','ve','vemos','ven']},
+  {inf:'dar', de:'geben', f:['doy','das','da','damos','dan']},
+  {inf:'pensar', de:'denken', f:['pienso','piensas','piensa','pensamos','piensan']},
+  {inf:'entender', de:'verstehen', f:['entiendo','entiendes','entiende','entendemos','entienden']},
+  {inf:'empezar', de:'anfangen', f:['empiezo','empiezas','empieza','empezamos','empiezan']}
+];
+
+/* =====================================================================
+   VOKABELN A1 (täglich werden weitere freigeschaltet)
+   ===================================================================== */
+function mkVocab(id, title, goal, pool){
+  return {id, title, goal, type:'vocab', pool};
+}
+const VOC_A1 = [
+mkVocab('va1-1','A1 · Wortschatz: Begrüßung & Small Talk','Die ersten Sätze im Gespräch',[
+  ['Hola','Hallo'],['Buenos días','Guten Morgen'],['Buenas tardes','Guten Tag / Guten Nachmittag'],['Buenas noches','Guten Abend / Gute Nacht'],
+  ['Adiós','Tschüss'],['Hasta luego','Bis später'],['Hasta mañana','Bis morgen'],['Por favor','Bitte'],['Gracias','Danke'],
+  ['De nada','Gern geschehen'],['Perdón','Entschuldigung'],['Lo siento','Es tut mir leid'],['¿Qué tal?','Wie geht’s?'],
+  ['Muy bien','Sehr gut'],['Más o menos','So lala'],['Encantado / Encantada','Freut mich']]),
+mkVocab('va1-2','A1 · Wortschatz: Familie & Personen','Über Menschen in deinem Umfeld sprechen',[
+  ['la madre','die Mutter'],['el padre','der Vater'],['el hermano','der Bruder'],['la hermana','die Schwester'],
+  ['el hijo','der Sohn'],['la hija','die Tochter'],['el abuelo','der Großvater'],['la abuela','die Großmutter'],
+  ['el tío','der Onkel'],['la tía','die Tante'],['el primo','der Cousin'],['el marido','der Ehemann'],
+  ['la mujer','die Frau'],['el amigo','der Freund']]),
+mkVocab('va1-3','A1 · Wortschatz: Essen & Trinken','Im Café und beim Einkaufen von Lebensmitteln',[
+  ['el agua','das Wasser'],['el pan','das Brot'],['la leche','die Milch'],['el café','der Kaffee'],['el té','der Tee'],
+  ['la carne','das Fleisch'],['el pescado','der Fisch'],['el pollo','das Hähnchen'],['el arroz','der Reis'],['la pasta','die Nudeln'],
+  ['la fruta','das Obst'],['la manzana','der Apfel'],['el huevo','das Ei'],['el queso','der Käse'],['la verdura','das Gemüse'],
+  ['la cerveza','das Bier'],['el vino','der Wein']]),
+mkVocab('va1-4','A1 · Wortschatz: Einkaufen & Preise','Im Geschäft nach dem Preis fragen und bezahlen',[
+  ['la tienda','das Geschäft'],['el supermercado','der Supermarkt'],['el precio','der Preis'],['barato','billig'],['caro','teuer'],
+  ['el dinero','das Geld'],['pagar','bezahlen'],['comprar','kaufen'],['¿Cuánto cuesta?','Wie viel kostet das?'],
+  ['la bolsa','die Tüte'],['el cliente','der Kunde'],['el cambio','das Wechselgeld'],['la tarjeta','die Karte'],['en efectivo','bar']]),
+mkVocab('va1-5','A1 · Wortschatz: Zuhause & Wohnung','Die eigene Wohnung beschreiben',[
+  ['la casa','das Haus'],['el piso','die Wohnung'],['la habitación','das Zimmer'],['la cocina','die Küche'],['el baño','das Bad'],
+  ['el salón','das Wohnzimmer'],['el dormitorio','das Schlafzimmer'],['la mesa','der Tisch'],['la silla','der Stuhl'],['la cama','das Bett'],
+  ['la puerta','die Tür'],['la ventana','das Fenster'],['la nevera','der Kühlschrank'],['cerca','nah'],['lejos','weit']]),
+mkVocab('va1-6','A1 · Wortschatz: Tagesablauf & Zeit','Den Alltag und Zeitangaben beschreiben',[
+  ['desayunar','frühstücken'],['almorzar','zu Mittag essen'],['cenar','zu Abend essen'],['trabajar','arbeiten'],['estudiar','lernen'],
+  ['descansar','sich ausruhen'],['dormir','schlafen'],['la mañana','der Morgen'],['la tarde','der Nachmittag'],['la noche','die Nacht'],
+  ['hoy','heute'],['ayer','gestern'],['la semana','die Woche'],['el mes','der Monat'],['el año','das Jahr'],['la hora','die Stunde']])
+];
+
+/* =====================================================================
+   GRAMMATIK A2
+   ===================================================================== */
+const A2_GRAMMAR = [
+{
+  id:'a2-1', title:'A2 · 10. Pretérito perfecto', goal:'Erlebtes aus der Gegenwart heraus berichten',
+  rule:`
+  <h3>Bildung</h3>
+  <p><b>haber</b> (he, has, ha, hemos, habéis, han) + Partizip:</p>
+  <table>
+    <tr><th>Infinitiv</th><th>Partizip</th><th>Beispiel</th></tr>
+    <tr><td>hablar</td><td>hablado</td><td>He hablado con Ana. (Ich habe mit Ana gesprochen.)</td></tr>
+    <tr><td>comer</td><td>comido</td><td>Hemos comido paella. (Wir haben Paella gegessen.)</td></tr>
+    <tr><td>vivir</td><td>vivido</td><td>Han vivido en Berlín. (Sie haben in Berlin gelebt.)</td></tr>
+    <tr><td>hacer</td><td>hecho</td><td>¿Qué has hecho? (Was hast du gemacht?)</td></tr>
+    <tr><td>ver</td><td>visto</td><td>¿Has visto la película? (Hast du den Film gesehen?)</td></tr>
+  </table>
+  <h3>Wann benutzt man es?</h3>
+  <ul>
+    <li>Bei Ereignissen in einer Zeit, die <b>noch nicht vorbei</b> ist: <i>hoy, esta semana, este año</i>. <i>Hoy he comido mucho.</i> (Heute habe ich viel gegessen.)</li>
+    <li>Bei <b>Lebenserfahrungen</b> ohne genaue Zeitangabe: <i>¿Has viajado a España?</i> (Warst du schon in Spanien?)</li>
+    <li>Mit <i>ya</i> (schon) und <i>todavía no</i> (noch nicht): <i>Ya he comido. / Todavía no he comido.</i></li>
+    <li>Mit <i>nunca</i> (nie) und <i>alguna vez</i> (jemals): <i>Nunca he viajado en avión.</i> (Ich bin noch nie geflogen.)</li>
+  </ul>
+  <div class="warn"><b>Achtung:</b> Das Partizip bleibt immer gleich. „haber“ ist das Hilfsverb. Anders als im Deutschen steht das Pronomen vor <i>haber</i>: <i>Lo he visto.</i> (Ich habe es gesehen.)</div>
+  <p class="rule"><b>Unterschied zum Indefinido:</b> Das Perfecto betont, dass etwas Teil der Gegenwart ist oder Auswirkungen hat. Das Indefinido erzählt ein abgeschlossenes Ereignis: <i>Ayer comí paella.</i> (Gestern habe ich Paella gegessen.)</p>`,
+  examples:['He comido paella hoy.','¿Has visto la película?','Nunca he viajado a Argentina.','Todavía no he comido.'],
+  ex:[
+    {t:'fill', q:'Yo ___ (comer) paella hoy.', a:'he comido', alt:['comido']},
+    {t:'mc', q:'Nosotros ___ a Italia este año.', o:['hemos viajado','hemos viajar','han viajado','he viajado'], a:0},
+    {t:'mc', q:'¿Qué ___ tú hoy?', o:['has hecho','has hacido','ha hecho','hemos hecho'], a:0},
+    {t:'fill', q:'Ellos han ___ (ver) la película.', a:'visto'},
+    {t:'mc', q:'„Ich habe es schon gesehen“ heißt:', o:['Ya lo he visto.','He visto ya.','Lo he ver.','Ya he ver.'], a:0}
+  ]
+},
+{
+  id:'a2-2', title:'A2 · 11. Pretérito indefinido (regelmäßig)', goal:'Abgeschlossene Ereignisse in der Vergangenheit erzählen',
+  rule:`
+  <h3>Die Endungen</h3>
+  <table>
+    <tr><th></th><th>hablar (-ar)</th><th>comer (-er)</th><th>vivir (-ir)</th></tr>
+    <tr><td>yo</td><td>hablé</td><td>comí</td><td>viví</td></tr>
+    <tr><td>tú</td><td>hablaste</td><td>comiste</td><td>viviste</td></tr>
+    <tr><td>él / ella / usted</td><td>habló</td><td>comió</td><td>vivió</td></tr>
+    <tr><td>nosotros</td><td>hablamos</td><td>comimos</td><td>vivimos</td></tr>
+    <tr><td>ellos / ustedes</td><td>hablaron</td><td>comieron</td><td>vivieron</td></tr>
+  </table>
+  <div class="step"><b>Erkennen:</b> Die Endung -ar ist -é / -aste / -ó / -amos / -aron. Die Endungen -er und -ir sind gleich: -í / -iste / -ió / -imos / -ieron. Achte auf den Akzent bei yo (é, í) und bei él/ella (ó, ió).</div>
+  <h3>Typische Zeitangaben</h3>
+  <p><i>ayer</i> (gestern), <i>anoche</i> (letzte Nacht), <i>el año pasado</i> (letztes Jahr), <i>el lunes</i> (am Montag), <i>hace dos días</i> (vor zwei Tagen), <i>en 2020</i> (im Jahr 2020).</p>
+  <div class="warn"><b>Achtung:</b> Die Form <i>nosotros</i> der -ar-Verben ist gleich wie im Präsens: <i>hablamos</i>. Erkennen kannst du den Unterschied am Zusammenhang und der Zeitangabe.</div>`,
+  examples:['Ayer hablé con mi madre.','Anoche comí pizza.','Mis abuelos vivieron en Sevilla.','Hace dos días viajamos.'],
+  ex:[
+    {t:'mc', q:'Ayer ___ con mi madre.', o:['hablé','hablo','hablaba','hablaste'], a:0},
+    {t:'fill', q:'Anoche ___ (comer, yo) pizza.', a:'comí'},
+    {t:'mc', q:'Ella ___ en Madrid dos años.', o:['vivió','vive','vivía','vivir'], a:0},
+    {t:'fill', q:'El año pasado nosotros ___ (viajar) a Sevilla.', a:'viajamos'},
+    {t:'mc', q:'Wie lautet „du hast gegessen“?', o:['comiste','comiste?','comió','comí'], a:0}
+  ]
+},
+{
+  id:'a2-3', title:'A2 · 12. Pretérito indefinido (unregelmäßig)', goal:'Die wichtigsten unregelmäßigen Verben der Vergangenheit',
+  rule:`
+  <h3>Die unregelmäßigen Formen</h3>
+  <table>
+    <tr><th>Person</th><th>ir / ser</th><th>hacer</th><th>tener</th><th>estar</th></tr>
+    <tr><td>yo</td><td>fui</td><td>hice</td><td>tuve</td><td>estuve</td></tr>
+    <tr><td>tú</td><td>fuiste</td><td>hiciste</td><td>tuviste</td><td>estuviste</td></tr>
+    <tr><td>él / ella</td><td>fue</td><td>hizo</td><td>tuvo</td><td>estuvo</td></tr>
+    <tr><td>nosotros</td><td>fuimos</td><td>hicimos</td><td>tuvimos</td><td>estuvimos</td></tr>
+    <tr><td>ellos</td><td>fueron</td><td>hicieron</td><td>tuvieron</td><td>estuvieron</td></tr>
+  </table>
+  <h3>Wichtige Hinweise</h3>
+  <ul>
+    <li><b>ir und ser</b> haben im Indefinido dieselbe Form. Der Satz zeigt, was gemeint ist: <i>Fui al cine.</i> (Ich bin ins Kino gegangen.) <i>Fue un día largo.</i> (Es war ein langer Tag.)</li>
+    <li>Diese Verben haben im Indefinido einen <b>neuen Stamm</b>: <i>hice, tuve, pude, dije</i>. Die Endungen sind ebenfalls anders als bei regelmäßigen Verben: <i>-e, -iste, -o, -imos, -ieron</i> (bei <i>decir</i>: <i>dije, dijiste, dijo, dijimos, dijeron</i>). Keine Akzente an diesen Formen.</li>
+    <li>Typische Verben mit <b>eigenem Stamm</b>: poder (pude), decir (dije), ver (vi), venir (vine), dar (di), saber (supe), querer (quise).</li>
+  </ul>
+  <div class="step"><b>Tipp:</b> Lerne die Formen in Gruppen: „hice, hiciste, hizo“ zusammen. So verwechselst du sie nicht mehr.</div>`,
+  examples:['Ayer fui al cine.','Ella hizo una tarta.','Nosotros tuvimos mucha suerte.','Fue un día largo.'],
+  ex:[
+    {t:'mc', q:'Ayer ___ al cine.', o:['fui','fue','fuiste','ir'], a:0},
+    {t:'fill', q:'Ella ___ (hacer) una tarta.', a:'hizo'},
+    {t:'mc', q:'Nosotros ___ (tener) mucha suerte.', o:['tuvimos','tuvieron','tuve','tenemos'], a:0},
+    {t:'fill', q:'Ayer yo ___ (estar) en casa.', a:'estuve'}
+  ]
+},
+{
+  id:'a2-4', title:'A2 · 13. Imperfecto & Indefinido', goal:'Hintergründe beschreiben und Ereignisse erzählen',
+  rule:`
+  <h3>Die Endungen des Imperfecto</h3>
+  <table>
+    <tr><th>Person</th><th>hablar</th><th>comer</th><th>vivir</th><th>ser</th><th>ir</th></tr>
+    <tr><td>yo</td><td>hablaba</td><td>comía</td><td>vivía</td><td>era</td><td>iba</td></tr>
+    <tr><td>tú</td><td>hablabas</td><td>comías</td><td>vivías</td><td>eras</td><td>ibas</td></tr>
+    <tr><td>él / ella</td><td>hablaba</td><td>comía</td><td>vivía</td><td>era</td><td>iba</td></tr>
+    <tr><td>nosotros</td><td>hablábamos</td><td>comíamos</td><td>vivíamos</td><td>éramos</td><td>íbamos</td></tr>
+    <tr><td>ellos</td><td>hablaban</td><td>comían</td><td>vivían</td><td>eran</td><td>iban</td></tr>
+  </table>
+  <p>Es gibt nur drei unregelmäßige Verben im Imperfecto: <i>ser</i> (era), <i>ir</i> (iba) und <i>ver</i> (veía). Alles andere ist regelmäßig.</p>
+
+  <h3>Wann Imperfecto, wann Indefinido?</h3>
+  <table>
+    <tr><th>Imperfecto (Hintergrund)</th><th>Indefinido (Handlung)</th></tr>
+    <tr><td>Beschreibungen: <i>Hacía frío.</i> (Es war kalt.)</td><td>Einzelnes Ereignis: <i>Llegó mi amigo.</i> (Mein Freund kam an.)</td></tr>
+    <tr><td>Gewohnheiten: <i>Cuando era niño, jugaba al fútbol.</i></td><td>Abgeschlossene Handlung: <i>Ayer jugué al fútbol.</i></td></tr>
+    <tr><td>Gleichzeitige Handlungen: <i>Mientras cocinaba, leía.</i></td><td>Unterbrechung: <i>Cuando llegó, cocinaba.</i></td></tr>
+    <tr><td>Alter, Gefühle: <i>Tenía miedo.</i> (Ich hatte Angst.)</td><td>Ereignis: <i>Tuve un accidente.</i></td></tr>
+  </table>
+  <div class="step"><b>Eselsbrücke:</b> Das Imperfecto ist die „Kulisse“ (wie die Bühne eines Films). Das Indefinido ist die „Handlung“ (was auf der Bühne passiert). Oft stehen beide im selben Satz: <i>Cuando <b>era</b> niño, <b>vivía</b> en el campo.</i> (Als ich Kind war, lebte ich auf dem Land.)</div>`,
+  examples:['Cuando era niño, vivía en el campo.','Hacía frío y llovía.','Ayer llegó mi amigo.','Mientras cocinaba, escuchaba música.'],
+  ex:[
+    {t:'mc', q:'Cuando era niño, ___ en el campo.', o:['vivía','viví','vivió','vive'], a:0},
+    {t:'fill', q:'Antes ___ (tener, yo) un coche rojo.', a:'tenía'},
+    {t:'mc', q:'Ayer ___ mucho frío. (Wetter beschreiben)', o:['hacía','hizo','hace','hice'], a:0, h:'Wetter in der Vergangenheit beschreibt man mit dem Imperfecto.'},
+    {t:'mc', q:'Mientras yo ___, mi hermano ___.', o:['cocinaba – leía','cociné – leí','cocino – leo','cocinaba – leí'], a:0}
+  ]
+},
+{
+  id:'a2-5', title:'A2 · 14. Objektpronomen', goal:'Direkte und indirekte Objekte ersetzen',
+  rule:`
+  <h3>Direktes und indirektes Objekt</h3>
+  <p>Im Deutschen fragst du: „Wen oder was?“ (Akkusativ) oder „Wem?“ (Dativ). Im Spanischen gibt es dafür eigene Pronomen, die du vor dem Verb setzt.</p>
+  <table>
+    <tr><th></th><th>direktes Objekt (Wen? Was?)</th><th>indirektes Objekt (Wem?)</th></tr>
+    <tr><td>mich / dich</td><td>me / te</td><td>me / te</td></tr>
+    <tr><td>ihn / sie (Sache)</td><td>lo / la</td><td>le</td></tr>
+    <tr><td>uns</td><td>nos</td><td>nos</td></tr>
+    <tr><td>sie (Plural)</td><td>los / las</td><td>les</td></tr>
+  </table>
+  <h3>Beispiele</h3>
+  <ul>
+    <li>¿Tienes el libro? – Sí, <b>lo</b> tengo. (Hast du das Buch? – Ja, ich habe es.)</li>
+    <li>A mi hermana <b>le</b> regalo un libro. (Ich schenke meiner Schwester ein Buch.)</li>
+    <li>Veo a Juan. → <b>Lo</b> veo. (Ich sehe ihn.)</li>
+  </ul>
+  <h3>Wo steht das Pronomen?</h3>
+  <p>Vor dem konjugierten Verb: <i>Lo tengo.</i> Oder angehängt an den Infinitiv oder das Gerundio: <i>Voy a comprarlo.</i> / <i>Lo voy a comprar.</i> (Ich werde es kaufen.)</p>
+  <div class="warn"><b>Typischer Fehler:</b> Das Pronomen „le“ wird nicht für den Akkusativ verwendet. Wenn du „ihn“ oder „sie“ meinst (direkt), nimm <i>lo</i> oder <i>la</i>. „le“ ist nur für „ihm/ihr“ (Dativ).</div>`,
+  examples:['Lo tengo.','A mi hermana le regalo un libro.','Lo voy a comprar.','Me gusta, te lo recomiendo.'],
+  ex:[
+    {t:'mc', q:'¿Tienes el libro? Sí, ___ tengo.', o:['lo','la','le','les'], a:0},
+    {t:'mc', q:'A mi hermana ___ regalo un libro.', o:['le','lo','la','les'], a:0},
+    {t:'mc', q:'Wie sagt man „Ich kaufe es“ (el coche)?', o:['Lo compro.','Compro lo.','Le compro.','La compro.'], a:0},
+    {t:'fill', q:'Veo a Juan. → ___ veo. (ihn)', a:'lo'}
+  ]
+},
+{
+  id:'a2-6', title:'A2 · 15. Vergleiche', goal:'Vergleichen und Superlative bilden',
+  rule:`
+  <table>
+    <tr><th>Struktur</th><th>Bedeutung</th><th>Beispiel</th></tr>
+    <tr><td>más / menos + Adjektiv + que</td><td>mehr / weniger … als</td><td>Madrid es más grande que Hannover.</td></tr>
+    <tr><td>tan + Adjektiv + como</td><td>so … wie</td><td>Mi casa es tan grande como la tuya.</td></tr>
+    <tr><td>mejor / peor que</td><td>besser / schlechter als</td><td>Este libro es mejor que el otro.</td></tr>
+    <tr><td>el / la / los / las más + Adjektiv</td><td>der / die / das … (Superlativ)</td><td>Ella es la más alta de la clase.</td></tr>
+  </table>
+  <h3>Besonderheiten</h3>
+  <ul>
+    <li><b>mejor</b> und <b>peor</b> sind eigene Vergleichsformen (nicht „más bueno“).</li>
+    <li>Vor einer Zahl heißt „als“ <b>de</b>: <i>Tengo más de treinta años.</i> (Ich bin über dreißig.)</li>
+    <li>Der Superlativ wird mit dem bestimmten Artikel gebildet: <i>el más caro</i> (der teuerste).</li>
+  </ul>
+  <div class="step"><b>Merke:</b> Im Deutschen „besser als“, im Spanischen <i>mejor que</i>. Das „als“ heißt immer <b>que</b>, außer bei Zahlen.</div>`,
+  examples:['Madrid es más grande que Hannover.','Este libro es mejor que el otro.','Mi casa es tan grande como la tuya.'],
+  ex:[
+    {t:'mc', q:'Madrid es ___ grande ___ Hannover.', o:['más – que','más – como','tan – que','mejor – que'], a:0},
+    {t:'fill', q:'Este libro es ___ (gut, Vergleich) que el otro.', a:'mejor'},
+    {t:'mc', q:'Ella es ___ alta de la clase.', o:['la más','el más','más','muy'], a:0},
+    {t:'mc', q:'„tan … como“ bedeutet:', o:['so … wie','mehr … als','besser als','am meisten'], a:0}
+  ]
+},
+{
+  id:'a2-7', title:'A2 · 16. Reflexive Verben', goal:'Über den Alltag sprechen (aufstehen, sich waschen, sich anziehen)',
+  rule:`
+  <h3>Was sind reflexive Verben?</h3>
+  <p>Bei reflexiven Verben handelt die Person an sich selbst. Im Deutschen heißt es „sich waschen“, „sich anziehen“. Im Spanischen gibt es das Pronomen <b>se</b> im Infinitiv, und die Konjugation passt das Pronomen an die Person an.</p>
+  <table>
+    <tr><th>Person</th><th>levantarse</th><th>ducharse</th><th>llamarse</th></tr>
+    <tr><td>yo</td><td>me levanto</td><td>me ducho</td><td>me llamo</td></tr>
+    <tr><td>tú</td><td>te levantas</td><td>te duchas</td><td>te llamas</td></tr>
+    <tr><td>él / ella / usted</td><td>se levanta</td><td>se ducha</td><td>se llama</td></tr>
+    <tr><td>nosotros</td><td>nos levantamos</td><td>nos duchamos</td><td>nos llamamos</td></tr>
+    <tr><td>ellos / ustedes</td><td>se levantan</td><td>se duchan</td><td>se llaman</td></tr>
+  </table>
+  <div class="step"><b>Regel:</b> Das Pronomen steht vor dem konjugierten Verb: <i>Me levanto a las siete.</i> Der Infinitiv endet auf <b>-se</b>, und dieses Anhängsel fällt bei der Konjugation weg.</div>
+  <h3>Häufige Verben im Alltag</h3>
+  <ul>
+    <li><i>levantarse</i> (aufstehen), <i>ducharse</i> (duschen), <i>vestirse</i> (sich anziehen), <i>acostarse</i> (ins Bett gehen), <i>llamarse</i> (heißen)</li>
+  </ul>
+  <div class="warn"><b>Achtung:</b> Nicht alle Verben mit „se“ sind reflexiv. Bei <i>Se llama Ana.</i> (Sie heißt Ana.) ist es reflexiv, weil die Person sich selbst „nennt“. Viele Verben wie <i>gustar</i> haben „se“ aus anderen Gründen. Lerne daher die reflexive Form jedes Verbs einzeln.</div>`,
+  examples:['Me levanto a las siete.','¿Cómo se llama usted?','Ellos se acuestan tarde.','Nos duchamos por la mañana.'],
+  ex:[
+    {t:'mc', q:'Yo ___ a las siete. (levantarse)', o:['me levanto','te levantas','se levanta','nos levantamos'], a:0},
+    {t:'fill', q:'¿Cómo ___ usted? (llamarse)', a:'se llama'},
+    {t:'mc', q:'Nosotros ___ por la mañana. (ducharse)', o:['nos duchamos','nos ducháis','se duchan','me duchamos'], a:0},
+    {t:'fill', q:'Ellos ___ tarde. (acostarse)', a:'se acuestan'}
+  ]
+},
+{
+  id:'a2-8', title:'A2 · 17. estar + Gerundio, hace/desde & ir a', goal:'Laufende Handlungen, Dauer und Zukunft ausdrücken',
+  rule:`
+  <h3>Gerundio (Verlaufsform)</h3>
+  <p>Die Bildung: <b>-ar → -ando</b> (hablando), <b>-er / -ir → -iendo</b> (comiendo, viviendo). Zusammen mit <i>estar</i> beschreibt es, was <b>gerade passiert</b>:</p>
+  <ul>
+    <li><i>Estoy comiendo.</i> (Ich esse gerade.)</li>
+    <li><i>Están hablando por teléfono.</i> (Sie telefonieren gerade.)</li>
+  </ul>
+  <div class="warn"><b>Unregelmäßig:</b> <i>leer → leyendo</i>, <i>decir → diciendo</i>, <i>ir → yendo</i>. Die Gerundio-Form von <i>dormir</i> ist <i>durmiendo</i>.</div>
+  <h3>Dauer: hace und desde</h3>
+  <p>Wenn etwas seit einer Zeit andauert, verwendet man:</p>
+  <ul>
+    <li><b>Vivo aquí desde hace tres años.</b> (Ich wohne seit drei Jahren hier.) – Präsens bei noch laufender Handlung.</li>
+    <li><b>Hace tres años que vivo aquí.</b> (Dasselbe, andere Reihenfolge.)</li>
+  </ul>
+  <h3>Zukunft: ir a + Infinitiv</h3>
+  <p>Für geplante Zukunft nutzt du das Präsens von <i>ir</i> plus <i>a</i> und dem Infinitiv: <i>Mañana voy a viajar a Barcelona.</i> (Morgen fahre ich nach Barcelona.) Das ist im Alltag die häufigste Zukunftsform.</p>`,
+  examples:['Estoy comiendo.','Vivo aquí desde hace tres años.','Mañana voy a viajar.','Están hablando por teléfono.'],
+  ex:[
+    {t:'fill', q:'Estoy ___ (comer). (gerade essen)', a:'comiendo'},
+    {t:'mc', q:'Vivo aquí ___ tres años.', o:['desde hace','hace','desde','para'], a:0},
+    {t:'mc', q:'Mañana ___ a Barcelona.', o:['voy a viajar','voy viajar','vamos viajar','voy viajo'], a:0},
+    {t:'fill', q:'Ahora mismo ___ (leer, nosotros). (wir lesen gerade)', a:'estamos leyendo'}
+  ]
+},
+{
+  id:'a2-9', title:'A2 · 18. Imperativ & Präpositionen', goal:'Bitten, Anweisungen geben und „für mich / mit dir“ sagen',
+  rule:`
+  <h3>Imperativ bei tú (bejahend)</h3>
+  <p>Für die Du-Form wird im bejahenden Imperativ die Form der 3. Person Singular genommen:</p>
+  <table>
+    <tr><th>Infinitiv</th><th>Imperativ (tú)</th><th>Beispiel</th></tr>
+    <tr><td>hablar</td><td>habla</td><td>¡Habla más despacio!</td></tr>
+    <tr><td>comer</td><td>come</td><td>¡Come algo!</td></tr>
+    <tr><td>escribir</td><td>escribe</td><td>¡Escribe un mensaje!</td></tr>
+  </table>
+  <h3>Unregelmäßige Imperative</h3>
+  <p><i>venir → ven</i> (komm), <i>decir → di</i> (sag), <i>hacer → haz</i> (mach), <i>tener → ten</i> (hab), <i>ir → ve</i> (geh), <i>poner → pon</i> (stell/leg). Diese solltest du auswendig lernen.</p>
+  <div class="warn"><b>Achtung:</b> Verneinte Befehle verwenden den Konjunktiv: <i>¡No hables tan rápido!</i> (Sprich nicht so schnell!) Der Imperativ ist hier kein Thema für A2, aber du wirst ihn hören.</div>
+
+  <h3>Präpositionen mit Personen</h3>
+  <ul>
+    <li><b>para mí</b> (für mich), <b>para ti</b> (für dich): <i>Este regalo es para ti.</i></li>
+    <li><b>conmigo</b> (mit mir), <b>contigo</b> (mit dir): <i>¿Vienes conmigo?</i> (Kommst du mit mir?)</li>
+  </ul>
+  <div class="step"><b>Merke:</b> Nach <i>con</i> entsteht eine Sonderform: <i>con + mí = conmigo</i>, <i>con + ti = contigo</i>. Nur bei diesen beiden Personen.</div>`,
+  examples:['¡Habla más despacio, por favor!','Este regalo es para ti.','¿Vienes conmigo?','¡Ven aquí!'],
+  ex:[
+    {t:'mc', q:'¡___ más despacio, por favor!', o:['Habla','Hablas','Hable','Hablo'], a:0},
+    {t:'fill', q:'¡___ aquí! (komm her, Imperativ von venir)', a:'ven'},
+    {t:'mc', q:'Este regalo es ___. (für mich)', o:['para mí','para yo','por mí','a mí'], a:0},
+    {t:'mc', q:'Wie sagt man „mit dir“?', o:['contigo','conmigo','con mí','ti'], a:0}
+  ]
+}
+];
+
+/* =====================================================================
+   VERBEN A2 (Indefinido, regelmäßig und unregelmäßig)
+   ===================================================================== */
+const VERBS_A2_REG = [
+  {inf:'hablar', de:'sprechen'}, {inf:'comer', de:'essen'}, {inf:'vivir', de:'wohnen / leben'},
+  {inf:'trabajar', de:'arbeiten'}, {inf:'estudiar', de:'studieren / lernen'}, {inf:'escuchar', de:'hören'},
+  {inf:'necesitar', de:'brauchen'}, {inf:'beber', de:'trinken'}, {inf:'aprender', de:'lernen'},
+  {inf:'escribir', de:'schreiben'}, {inf:'comprar', de:'kaufen'}, {inf:'bailar', de:'tanzen'},
+  {inf:'cocinar', de:'kochen'}, {inf:'abrir', de:'öffnen'}
+].map(v => ({...v, f: pretReg(v.inf)}));
+
+const VERBS_A2_IRR = [
+  {inf:'ir / ser', de:'gehen / sein', f:['fui','fuiste','fue','fuimos','fueron']},
+  {inf:'hacer', de:'machen', f:['hice','hiciste','hizo','hicimos','hicieron']},
+  {inf:'tener', de:'haben', f:['tuve','tuviste','tuvo','tuvimos','tuvieron']},
+  {inf:'estar', de:'sein (Zustand)', f:['estuve','estuviste','estuvo','estuvimos','estuvieron']},
+  {inf:'poder', de:'können', f:['pude','pudiste','pudo','pudimos','pudieron']},
+  {inf:'decir', de:'sagen', f:['dije','dijiste','dijo','dijimos','dijeron']},
+  {inf:'ver', de:'sehen', f:['vi','viste','vio','vimos','vieron']},
+  {inf:'venir', de:'kommen', f:['vine','viniste','vino','vinimos','vinieron']},
+  {inf:'dar', de:'geben', f:['di','diste','dio','dimos','dieron']},
+  {inf:'saber', de:'wissen', f:['supe','supiste','supo','supimos','supieron']},
+  {inf:'querer', de:'wollen', f:['quise','quisiste','quiso','quisimos','quisieron']}
+];
+
+/* =====================================================================
+   VERB-LEKTIONEN (Verben werden täglich freigeschaltet)
+   ===================================================================== */
+const VERB_LESSONS = [
+  {id:'vb1-reg', type:'verb', pool:VERBS_A1_REG, title:'A1 · Verben: regelmäßig (Präsens)', goal:'-ar, -er, -ir sicher konjugieren', mode:'pres', note:'Jeden Tag kommen neue regelmäßige Verben dazu.'},
+  {id:'vb1-irr', type:'verb', pool:VERBS_A1_IRR, title:'A1 · Verben: unregelmäßig (Präsens)', goal:'tener, ir, hacer, poder und weitere wichtige Verben', mode:'pres', note:'Jeden Tag kommen neue unregelmäßige Verben dazu.'},
+  {id:'vb2-reg', type:'verb', pool:VERBS_A2_REG, title:'A2 · Verben: regelmäßig (Indefinido)', goal:'Vergangenheit mit -é, -aste, -ó, -í, -iste, -ió', mode:'pret', note:'Jeden Tag kommen neue regelmäßige Verben dazu.'},
+  {id:'vb2-irr', type:'verb', pool:VERBS_A2_IRR, title:'A2 · Verben: unregelmäßig (Indefinido)', goal:'fui, hice, tuve, estuve, pude und weitere Formen', mode:'pret', note:'Jeden Tag kommen neue unregelmäßige Verben dazu.'}
+];
+
+/* =====================================================================
+   VOKABELN A2 (täglich werden weitere freigeschaltet)
+   ===================================================================== */
+const VOC_A2 = [
+mkVocab('va2-1','A2 · Wortschatz: Gesundheit & Arzt','Krankheiten beschreiben und einen Termin machen',[
+  ['el médico','der Arzt'],['enfermo','krank'],['el dolor de cabeza','die Kopfschmerzen'],['la fiebre','das Fieber'],['la farmacia','die Apotheke'],
+  ['la medicina','das Medikament'],['la receta','das Rezept'],['la cita','der Termin'],['el resfriado','die Erkältung'],['la tos','der Husten'],
+  ['el dolor de estómago','die Bauchschmerzen'],['el hospital','das Krankenhaus'],['sentirse mal','sich schlecht fühlen'],['la ayuda','die Hilfe']]),
+mkVocab('va2-2','A2 · Wortschatz: Arbeit & Bewerbung','Über den Beruf und eine Bewerbung sprechen',[
+  ['el empleo','die Stelle'],['la entrevista','das Vorstellungsgespräch'],['el currículum','der Lebenslauf'],['el sueldo','das Gehalt'],
+  ['el horario','die Arbeitszeiten'],['el contrato','der Vertrag'],['la experiencia','die Erfahrung'],['la reunión','die Besprechung'],
+  ['el compañero de trabajo','der Kollege'],['la tarea','die Aufgabe'],['el puesto','die Position'],['la empresa','die Firma'],
+  ['el jefe','der Chef'],['las vacaciones','der Urlaub']]),
+mkVocab('va2-3','A2 · Wortschatz: Reisen & Verkehr','Am Bahnhof, Flughafen und im Hotel',[
+  ['el billete','das Ticket'],['el tren','der Zug'],['el avión','das Flugzeug'],['la reserva','die Reservierung'],['el hotel','das Hotel'],
+  ['la maleta','der Koffer'],['llegar','ankommen'],['salir','abfahren'],['el retraso','die Verspätung'],['el pasaporte','der Reisepass'],
+  ['el vuelo','der Flug'],['el autobús','der Bus'],['el equipaje','das Gepäck'],['el billete de ida y vuelta','die Hin- und Rückfahrkarte']]),
+mkVocab('va2-4','A2 · Wortschatz: Restaurant & Bestellung','Im Restaurant bestellen und bezahlen',[
+  ['la carta','die Speisekarte'],['el menú del día','das Tagesmenü'],['la cuenta','die Rechnung'],['el camarero','der Kellner'],
+  ['la propina','das Trinkgeld'],['reservar','reservieren'],['pedir','bestellen'],['el cuchillo','das Messer'],['el tenedor','die Gabel'],
+  ['la cuchara','der Löffel'],['el plato','der Teller'],['el postre','die Nachspeise'],['sin','ohne'],['con','mit']]),
+mkVocab('va2-5','A2 · Wortschatz: Wohnen & Nachbarn','Über Miete, Nachbarn und die Wohnung sprechen',[
+  ['el alquiler','die Miete'],['el vecino','der Nachbar'],['el ruido','der Lärm'],['limpiar','putzen'],['el barrio','das Viertel'],
+  ['mudarse','umziehen'],['la lavadora','die Waschmaschine'],['el ascensor','der Aufzug'],['el balcón','der Balkon'],
+  ['la calefacción','die Heizung'],['la factura','die Rechnung (Abrechnung)'],['el contrato de alquiler','der Mietvertrag'],['la comunidad','die Hausgemeinschaft']]),
+mkVocab('va2-6','A2 · Wortschatz: Gefühle & Charakter','Stimmungen und Eigenschaften beschreiben',[
+  ['contento','glücklich'],['triste','traurig'],['nervioso','nervös'],['cansado','müde'],['aburrido','gelangweilt'],['enfadado','wütend'],
+  ['sorprendido','überrascht'],['preocupado','besorgt'],['tranquilo','ruhig'],['simpático','sympathisch'],['antipático','unsympathisch'],
+  ['amable','freundlich'],['tímido','schüchtern'],['divertido','lustig']]),
+mkVocab('va2-7','A2 · Wortschatz: Telefon & Gesprächsphrasen','Am Telefon sprechen und im Alltag nachfragen',[
+  ['llamar','anrufen'],['el mensaje','die Nachricht'],['quedar','sich verabreden'],['llegar tarde','zu spät kommen'],['cancelar','absagen'],
+  ['ocupado','besetzt'],['el número de teléfono','die Telefonnummer'],['¿Diga?','Hallo? (am Telefon)'],['¿De parte de quién?','Wer spricht?'],
+  ['Un momento','Einen Moment'],['Más tarde','Später'],['Nos vemos','Wir sehen uns'],['¿Puedes repetirlo?','Kannst du das wiederholen?'],
+  ['No entiendo','Ich verstehe nicht'],['¿Cómo se dice…?','Wie sagt man …?'],['Más despacio, por favor','Langsamer, bitte']])
+];
+
+/* ---------- ARTIKEL-TRAINING (kurzes Zusatzmodul) ---------- */
+const ARTIKEL_TRAINING = {
+  id:'art-train', title:'A1 · Artikel-Training (Wiederholung)', goal:'Bestimmt oder unbestimmt? Richtig erkennen',
+  rule:`<p>Bevor du weitermachst, prüfe dein Gefühl für Artikel. Denk bei jeder Aufgabe: Ist das Wort <b>bekannt oder bestimmt</b>? Dann <i>el / la / los / las</i>. Ist es <b>neu oder eines von vielen</b>? Dann <i>un / una / unos / unas</i>.</p>
+  <div class="step"><b>Vorgehen:</b> 1. Geschlecht bestimmen (Endung, Ausnahme?) → 2. Bestimmt oder unbestimmt? → 3. Singular oder Plural?</div>`,
+  examples:['¿Tienes un libro? – Sí, el libro es interesante.','Quiero una manzana, por favor.'],
+  type:'static',
+  ex:[
+    {t:'mc', q:'___ mesa es grande. (Der Tisch … bekannt)', o:['El','La','Los','Las'], a:1},
+    {t:'mc', q:'Tengo ___ coche nuevo. (ein neues Auto)', o:['un','una','el','la'], a:0},
+    {t:'mc', q:'___ agua está fría. (Das Wasser … bekannt)', o:['El','La','Un','Una'], a:0, h:'„agua“ ist feminin, aber mit betontem a- steht „el“.'},
+    {t:'mc', q:'Quiero ___ manzanas. (einige Äpfel)', o:['unas','unos','las','una'], a:0},
+    {t:'fill', q:'___ (die Kinder, bekannt, Plural): ___ niños', a:'los', h:'Maskulin Plural bestimmt: „los“.'},
+    {t:'mc', q:'Es ___ amigo de mi hermano. (ein Freund)', o:['un','una','el','los'], a:0},
+    {t:'mc', q:'___ problema es muy difícil. (das Problem)', o:['El','La','Un','Una'], a:0},
+    {t:'fill', q:'Voy ___ mercado. (a + el)', a:'al'}
+  ]
+};
+
+/* =====================================================================
+   LEKTIONEN ZUSAMMENSETZEN
+   ===================================================================== */
+const A1 = [...A1_GRAMMAR, ARTIKEL_TRAINING, ...VERB_LESSONS.filter(v=>v.id.startsWith('vb1'))];
+const A2 = [...A2_GRAMMAR, ...VERB_LESSONS.filter(v=>v.id.startsWith('vb2'))];
+const LESSONS = [...A1, ...VOC_A1, ...A2, ...VOC_A2];
+
+/* =====================================================================
+   SEITEN
+   ===================================================================== */
+const nav = document.getElementById('nav');
+const main = document.getElementById('main');
+
+function labelOf(L){ return L.title.startsWith('A') ? L.title : 'A1 · ' + L.title; }
+
+function buildNav(active){
+  nav.innerHTML = `<div class="card">
+      <button class="nav-btn ${active==='home'?'active':''}" data-go="home"><span>🏠 Start & Heute</span></button>
+      <button class="nav-btn ${active==='exam'?'active':''}" data-go="exam"><span>📝 Prüfungs-Simulation</span></button>
+    </div>` +
+  LESSONS.map((L,i)=>{
+    const d = progress.done[L.id];
+    return `<button class="nav-btn ${active===i?'active':''}" data-go="${i}"><span>${labelOf(L)}</span>${d!==undefined?`<span class="badge">${d}%</span>`:''}</button>`;
+  }).join('');
+}
+
+function renderEx(list, host, onFinish){
+  host.innerHTML = '';
+  let score = 0, n = 0;
+  list.forEach((e,i)=>{
+    const d = document.createElement('div');
+    d.className = 'ex';
+    d.innerHTML = `<p><b>${i+1}.</b> ${e.q}</p>` + (e.t==='mc'
+      ? `<div class="opts">${e.o.map((o,j)=>`<button data-j="${j}">${o}</button>`).join('')}</div>`
+      : `<input type="text" autocomplete="off" placeholder="Antwort auf Spanisch"> <button class="primary chk">Prüfen</button>`)
+      + `<div class="fb"></div>`;
+    host.appendChild(d);
+    const fb = d.querySelector('.fb');
+    const finish = (ok, txt)=>{
+      if(d.dataset.done) return;
+      d.dataset.done = 1; n++; if(ok) score++;
+      fb.className = 'fb ' + (ok?'ok':'bad');
+      fb.textContent = (ok ? '✔ Richtig! ' : '✘ Leider falsch. ') + txt;
+      if(n === list.length) onFinish(score, list.length);
+    };
+    if(e.t === 'mc'){
+      d.querySelectorAll('.opts button').forEach(b=>b.onclick = ()=>{
+        if(d.dataset.done) return;
+        const j = +b.dataset.j;
+        d.querySelectorAll('.opts button').forEach(x=>x.disabled = true);
+        b.classList.add('sel');
+        finish(j === e.a, e.h || ('Richtige Antwort: ' + e.o[e.a]));
+      });
+    } else {
+      const inp = d.querySelector('input');
+      const go = ()=>{
+        if(!inp.value.trim() || d.dataset.done) return;
+        const v = norm(inp.value);
+        const ok = v === norm(e.a) || (e.alt||[]).some(x=>norm(x)===v);
+        inp.disabled = true;
+        finish(ok, e.h || ('Richtige Antwort: ' + e.a));
+      };
+      d.querySelector('.chk').onclick = go;
+      inp.onkeydown = ev => { if(ev.key === 'Enter') go(); };
+    }
+  });
+}
+
+function showHome(){
+  buildNav('home');
+  const doneCount = Object.keys(progress.done).length;
+  const avg = doneCount ? Math.round(Object.values(progress.done).reduce((a,b)=>a+b,0)/doneCount) : 0;
+  const todayIdx = Math.floor(Date.now()/86400000) % LESSONS.length;
+  const day = dayOffset() + 1;
+  const vocCount = LESSONS.filter(L=>L.type==='vocab').reduce((s,L)=>s+visible(L.pool).length,0);
+  const verbCount = LESSONS.filter(L=>L.type==='verb').reduce((s,L)=>s+visible(L.pool,4).length,0);
+  main.innerHTML = `
+    <div class="card">
+      <h2>¡Hola! Willkommen in deinem Kurs</h2>
+      <p>Ich bin dein Lehrer. Wir gehen Schritt für Schritt vor: erst die Regel verstehen, dann mit Beispielen üben, dann selbst sprechen. Du musst nicht alles an einem Tag schaffen. Regelmäßigkeit bringt dich weiter als lange Einzelsitzungen.</p>
+      <div class="stats">
+        <div class="stat">Kurstag<br><b>${day}</b></div>
+        <div class="stat">Lektionen begonnen<br><b>${doneCount}/${LESSONS.length}</b></div>
+        <div class="stat">Ø Ergebnis<br><b>${avg}%</b></div>
+        <div class="stat">Vokabeln freigeschaltet<br><b>${vocCount}</b></div>
+        <div class="stat">Verben freigeschaltet<br><b>${verbCount}</b></div>
+      </div>
+      <p class="muted">Jeden Tag werden automatisch neue Vokabeln und Verben freigeschaltet. Je länger du dabei bist, desto mehr siehst du.</p>
+    </div>
+    <div class="card">
+      <h3>Lektion für heute</h3>
+      <p>${labelOf(LESSONS[todayIdx])}: ${LESSONS[todayIdx].goal}</p>
+      <button class="primary" data-go="${todayIdx}">Heutige Lektion starten</button>
+    </div>
+    <div class="card">
+      <h3>Prüfungs-Simulation</h3>
+      <p>20 gemischte Aufgaben aus allen Lektionen. Ideal, um deinen Stand zu prüfen.</p>
+      <button class="secondary" data-go="exam">Simulation starten</button>
+    </div>`;
+}
+
+function showLesson(i){
+  buildNav(i);
+  const L = LESSONS[i];
+  let rule = L.rule || '';
+  let examples = L.examples || [];
+  let note = L.note || '';
+  let ex = getEx(L);
+
+  if(L.type === 'vocab'){
+    const items = visible(L.pool);
+    rule = `<table>${items.map(([es,de])=>`<tr><td>${es}</td><td>${de}</td><td><button class="sound" data-say="${es}">🔊</button></td></tr>`).join('')}</table>`;
+    examples = items.slice(0,3).map(v=>v[0]);
+    note = `${items.length} von ${L.pool.length} Vokabeln freigeschaltet. Jeden Tag kommen neue dazu.`;
+  }
+  if(L.type === 'verb'){
+    const items = visible(L.pool, 4);
+    const head = L.mode === 'pres'
+      ? '<tr><th>Verb</th><th>yo</th><th>tú</th><th>él / ella</th><th>nosotros</th><th>ellos</th></tr>'
+      : '<tr><th>Verb</th><th>yo</th><th>tú</th><th>él / ella</th><th>nosotros</th><th>ellos</th></tr>';
+    rule = `<p class="rule">${L.mode==='pres'
+      ? '<b>Merke:</b> Im Präsens steht die Verbendung für die Person. Lerne jede Reihe laut, dann jede Spalte.'
+      : '<b>Merke:</b> Im Indefinido (abgeschlossene Vergangenheit) steht die Form für die Person. Achte besonders auf den Akzent bei yo und él/ella.'}</p>
+      <table>${head}${items.map(v=>`<tr><td><b>${v.inf}</b> (${v.de})</td>${v.f.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table>`;
+    note = `${items.length} von ${L.pool.length} Verben freigeschaltet. ${L.note}`;
+    examples = [];
+  }
+
+  main.innerHTML = `
+    <div class="card">
+      <h2>${labelOf(L)}</h2>
+      <p class="muted">${L.goal}</p>
+      ${rule}
+      ${examples.length ? `<h3>Beispiele zum Anhören & Nachsprechen</h3>${examples.map(s=>`<p>${s}<button class="sound" data-say="${s}">🔊</button></p>`).join('')}` : ''}
+      ${note ? `<p class="muted">${note}</p>` : ''}
+    </div>
+    <div class="card">
+      <h3>Übungen</h3>
+      <div id="exh"></div>
+    </div>`;
+  renderEx(ex, document.getElementById('exh'), (s,t)=>{
+    const pct = Math.round(s/t*100);
+    progress.done[L.id] = Math.max(progress.done[L.id] || 0, pct);
+    save();
+    buildNav(i);
+    document.getElementById('exh').insertAdjacentHTML('beforeend',
+      `<p><b>Ergebnis: ${s}/${t} (${pct}%)</b> ${pct===100?'🎉 Perfekt!':'Wiederhole die Lektion, dann versuchen wir es noch einmal.'}</p>`);
+  });
+}
+
+function showExam(){
+  buildNav('exam');
+  const all = LESSONS.flatMap(L=>getEx(L));
+  const picked = all.sort(()=>Math.random()-0.5).slice(0,20);
+  main.innerHTML = `<div class="card"><h2>Prüfungs-Simulation</h2>
+    <p class="muted">20 zufällige Aufgaben aus allen Lektionen.</p><div id="exh"></div></div>`;
+  renderEx(picked, document.getElementById('exh'), (s,t)=>{
+    const pct = Math.round(s/t*100);
+    document.getElementById('exh').insertAdjacentHTML('beforeend',
+      `<p><b>Gesamtergebnis: ${s}/${t} (${pct}%)</b><br>
+       ${pct>=80?'Sehr gut! Dein Grammatik-Grundgerüst sitzt.':pct>=60?'Gut, aber einige Bereiche brauchen noch Übung.':'Wir wiederholen die Lektionen mit den meisten Fehlern.'}</p>
+       <button class="secondary" data-go="exam">Neue Simulation</button>`);
+  });
+}
+
+/* ---------- EVENTS ---------- */
+document.body.addEventListener('click', e=>{
+  const go = e.target.closest('[data-go]');
+  if(go){
+    const g = go.dataset.go;
+    if(g==='home') showHome();
+    else if(g==='exam') showExam();
+    else showLesson(+g);
+    window.scrollTo(0,0);
+  }
+  const s = e.target.closest('[data-say]');
+  if(s) say(s.dataset.say);
+});
+
+/* Zusätzliche, täglich automatisch erzeugte Einträge aus data/extra.json */
+fetch('data/extra.json', {cache:'no-store'})
+  .then(r => r.ok ? r.json() : {})
+  .then(extra => {
+    (extra.verbs || []).forEach(v => {
+      const id = (v.level === 'A2' ? 'vb2-' : 'vb1-') + (v.type === 'irregular' ? 'irr' : 'reg');
+      const L = LESSONS.find(x => x.id === id);
+      if (L && !L.pool.some(p => p.inf === v.inf)) L.pool.push({inf: v.inf, de: v.de, f: v.f});
+    });
+    (extra.vocab || []).forEach(w => {
+      const L = LESSONS.find(x => x.id === w.lesson);
+      if (L && L.pool && !L.pool.some(p => p[0] === w.es)) L.pool.push([w.es, w.de]);
+    });
+    // Startseite nur neu zeichnen, wenn der Nutzer gerade noch dort ist
+    if (!document.getElementById('exh')) showHome();
+  })
+  .catch(() => {});
+
+showHome();
+</script>
+</body>
+</html>
